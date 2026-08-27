@@ -52,13 +52,18 @@ public class StatClient {
      */
     public List<ViewStats> getStats(String start, String end, List<String> uris, Boolean unique) {
         try {
-            String url = UriComponentsBuilder.fromPath("/stats")
+            UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/stats")
                     .queryParam("start", start)
                     .queryParam("end", end)
-                    .queryParam("uris", uris != null ? String.join(",", uris) : null)
-                    .queryParam("unique", unique != null ? unique : false)
-                    .build()
-                    .toUriString();
+                    .queryParam("unique", unique != null ? unique : false);
+
+            if (uris != null && !uris.isEmpty()) {
+                for (String uri : uris) {
+                    builder.queryParam("uris", uri);
+                }
+            }
+
+            String url = builder.build().toUriString();
 
             return restClient.get()
                     .uri(url)
