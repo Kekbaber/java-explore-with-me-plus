@@ -55,7 +55,7 @@ public class StatClient {
             UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/stats")
                     .queryParam("start", start)
                     .queryParam("end", end)
-                    .queryParam("unique", unique != null ? unique : false);
+                    .queryParam("unique", unique != null && unique);
 
             if (uris != null && !uris.isEmpty()) {
                 for (String uri : uris) {
