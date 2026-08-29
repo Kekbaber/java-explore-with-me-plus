@@ -1,7 +1,7 @@
 package ru.practicum.stat.client;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +15,14 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class StatClient {
+
     private final RestClient restClient;
 
-    /**
-     * POST /hit
-     */
+    public StatClient(@Value("${stat.server.url:http://localhost:9090}") String baseUrl) {
+        this.restClient = RestClient.builder().baseUrl(baseUrl).build();
+    }
+
     public boolean saveHit(EndpointHit hit) {
         try {
             ResponseEntity<Void> response = restClient.post()
@@ -47,9 +48,6 @@ public class StatClient {
         }
     }
 
-    /**
-     * GET /stats
-     */
     public List<ViewStats> getStats(String start, String end, List<String> uris, Boolean unique) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/stats")
