@@ -7,10 +7,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.stat.dto.EndpointHit;
+import ru.practicum.stat.dto.StatsRequest;
 import ru.practicum.stat.dto.ViewStats;
 import ru.practicum.stat.model.Hit;
 import ru.practicum.stat.repository.StatsRepository;
-import ru.practicum.stat.service.StatsServiceImpl;
+import ru.practicum.stat.service.impl.StatsServiceImpl;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -37,6 +38,10 @@ class StatsServiceImplTest {
         baseTime = LocalDateTime.parse("2026-08-27 00:00:00", formatter);
     }
 
+    private static StatsRequest createStatsRequest(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        return StatsRequest.builder().start(start).end(end).uris(uris).unique(unique).build();
+    }
+
     @Test
     void saveHit_shouldSaveHitSuccessfully() {
 
@@ -44,7 +49,7 @@ class StatsServiceImplTest {
                 .app("test-app")
                 .uri("/test/1")
                 .ip("192.168.1.1")
-                .timestamp(baseTime.format(formatter))
+                .timestamp(baseTime)
                 .build();
 
         Hit expectedHit = Hit.builder()
@@ -71,6 +76,8 @@ class StatsServiceImplTest {
         List<String> uris = List.of("/test/1", "/test/2");
         Boolean unique = true;
 
+        StatsRequest request = createStatsRequest(start, end, uris, unique);
+
         List<ViewStats> expectedStats = List.of(
                 new ViewStats("test-app", "/test/1", 2L),
                 new ViewStats("another-app", "/test/2", 1L)
@@ -80,7 +87,7 @@ class StatsServiceImplTest {
                 .thenReturn(expectedStats);
 
         // When
-        List<ViewStats> result = statsService.getStats(start, end, uris, unique);
+        List<ViewStats> result = statsService.getStats(request);
 
         // Then
         assertThat(result).isEqualTo(expectedStats);
@@ -96,6 +103,8 @@ class StatsServiceImplTest {
         List<String> uris = null;
         Boolean unique = true;
 
+        StatsRequest request = createStatsRequest(start, end, uris, unique);
+
         List<ViewStats> expectedStats = List.of(
                 new ViewStats("test-app", "/test/1", 2L),
                 new ViewStats("another-app", "/test/2", 1L),
@@ -106,7 +115,7 @@ class StatsServiceImplTest {
                 .thenReturn(expectedStats);
 
         // When
-        List<ViewStats> result = statsService.getStats(start, end, uris, unique);
+        List<ViewStats> result = statsService.getStats(request);
 
         // Then
         assertThat(result).isEqualTo(expectedStats);
@@ -122,6 +131,8 @@ class StatsServiceImplTest {
         List<String> uris = List.of("/test/1");
         Boolean unique = false;
 
+        StatsRequest request = createStatsRequest(start, end, uris, unique);
+
         List<ViewStats> expectedStats = List.of(
                 new ViewStats("test-app", "/test/1", 3L)
         );
@@ -130,7 +141,7 @@ class StatsServiceImplTest {
                 .thenReturn(expectedStats);
 
 
-        List<ViewStats> result = statsService.getStats(start, end, uris, unique);
+        List<ViewStats> result = statsService.getStats(request);
 
 
         assertThat(result).isEqualTo(expectedStats);
@@ -146,6 +157,8 @@ class StatsServiceImplTest {
         List<String> uris = null;
         Boolean unique = false;
 
+        StatsRequest request = createStatsRequest(start, end, uris, unique);
+
         List<ViewStats> expectedStats = List.of(
                 new ViewStats("test-app", "/test/1", 3L),
                 new ViewStats("another-app", "/test/2", 1L),
@@ -156,7 +169,7 @@ class StatsServiceImplTest {
                 .thenReturn(expectedStats);
 
 
-        List<ViewStats> result = statsService.getStats(start, end, uris, unique);
+        List<ViewStats> result = statsService.getStats(request);
 
 
         assertThat(result).isEqualTo(expectedStats);

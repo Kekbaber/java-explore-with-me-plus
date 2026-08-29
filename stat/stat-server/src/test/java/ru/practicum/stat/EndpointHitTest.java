@@ -8,14 +8,15 @@ import org.junit.jupiter.api.Test;
 import ru.practicum.stat.dto.EndpointHit;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Month;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EndpointHitTest {
 
+    private static final LocalDateTime FIXED_DATE = LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0, 0);
+
     private Validator validator;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @BeforeEach
     void setUp() {
@@ -30,7 +31,7 @@ class EndpointHitTest {
                 .app("test-app")
                 .uri("/test/1")
                 .ip("192.168.1.1")
-                .timestamp(LocalDateTime.now().format(formatter))
+                .timestamp(FIXED_DATE)
                 .build();
 
 
@@ -47,7 +48,7 @@ class EndpointHitTest {
                 .app(null)
                 .uri("/test/1")
                 .ip("192.168.1.1")
-                .timestamp(LocalDateTime.now().format(formatter))
+                .timestamp(FIXED_DATE)
                 .build();
 
 
@@ -64,7 +65,7 @@ class EndpointHitTest {
                 .app("test-app")
                 .uri(null)
                 .ip("192.168.1.1")
-                .timestamp(LocalDateTime.now().format(formatter))
+                .timestamp(FIXED_DATE)
                 .build();
 
 
@@ -81,7 +82,7 @@ class EndpointHitTest {
                 .app("test-app")
                 .uri("/test/1")
                 .ip(null)
-                .timestamp(LocalDateTime.now().format(formatter))
+                .timestamp(FIXED_DATE)
                 .build();
 
 
@@ -111,7 +112,7 @@ class EndpointHitTest {
     @Test
     void endpointHit_builder_shouldCreateCorrectObject() {
 
-        String timestamp = LocalDateTime.now().format(formatter);
+        LocalDateTime timestamp = FIXED_DATE;
 
 
         EndpointHit hit = EndpointHit.builder()
