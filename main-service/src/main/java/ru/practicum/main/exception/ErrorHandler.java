@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.main.exception.model.ConflictException;
+import ru.practicum.main.exception.model.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -89,5 +91,21 @@ public class ErrorHandler {
     public ApiError handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpServletRequest r) {
         log.error("Неверный формат JSON: {}", e.getMessage());
         return buildApiError("Неверный формат запроса", e.getMessage(), HttpStatus.BAD_REQUEST, r);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleNotFound(final NotFoundException e, HttpServletRequest request) {
+        log.error("Объект не найден: {}", e.getMessage());
+        return buildApiError("The required object was not found.",
+                e.getMessage(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleConflict(final ConflictException e, HttpServletRequest request) {
+        log.error("Конфликт данных: {}", e.getMessage());
+        return buildApiError("For the requested operation the conditions are not met.",
+                e.getMessage(), HttpStatus.CONFLICT, request);
     }
 }
