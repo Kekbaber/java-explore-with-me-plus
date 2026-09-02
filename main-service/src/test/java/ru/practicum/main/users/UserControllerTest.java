@@ -5,8 +5,8 @@ import ru.practicum.main.controller.UserController;
 import ru.practicum.main.dto.request.NewUserRequest;
 import ru.practicum.main.dto.request.UsersRequest;
 import ru.practicum.main.dto.response.UserDto;
-import ru.practicum.main.exception.user.EmailAlreadyExistsException;
-import ru.practicum.main.exception.user.UserNotFoundException;
+import ru.practicum.main.exception.model.ConflictException;
+import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +123,7 @@ class UserControllerTest {
         request.setEmail("existing@example.com");
 
         when(userService.createUser(any(NewUserRequest.class)))
-                .thenThrow(new EmailAlreadyExistsException("Пользователь с email 'existing@example.com' уже существует"));
+                .thenThrow(new ConflictException("Пользователь с email 'existing@example.com' уже существует"));
 
         mockMvc.perform(post("/admin/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +222,7 @@ class UserControllerTest {
 
     @Test
     void deleteUser_ShouldReturnNotFound_WhenUserDoesNotExist() throws Exception {
-        doThrow(new UserNotFoundException("Пользователь с id: 999 не найден"))
+        doThrow(new NotFoundException("Пользователь с id: 999 не найден"))
                 .when(userService).deleteUser(999L);
 
         mockMvc.perform(delete("/admin/users/999"))

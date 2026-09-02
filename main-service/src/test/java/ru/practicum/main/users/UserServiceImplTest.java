@@ -3,8 +3,8 @@ package ru.practicum.main.users;
 import ru.practicum.main.dto.request.NewUserRequest;
 import ru.practicum.main.dto.request.UsersRequest;
 import ru.practicum.main.dto.response.UserDto;
-import ru.practicum.main.exception.user.EmailAlreadyExistsException;
-import ru.practicum.main.exception.user.UserNotFoundException;
+import ru.practicum.main.exception.model.ConflictException;
+import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.User;
 import ru.practicum.main.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +83,7 @@ class UserServiceImplTest {
         when(userRepository.existsByEmail(validRequest.getEmail())).thenReturn(true);
 
         assertThatThrownBy(() -> userService.createUser(validRequest))
-                .isInstanceOf(EmailAlreadyExistsException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("Пользователь с email 'john@example.com' уже существует");
 
         verify(userRepository).existsByEmail(validRequest.getEmail());
@@ -222,7 +222,7 @@ class UserServiceImplTest {
         when(userRepository.existsById(999L)).thenReturn(false);
 
         assertThatThrownBy(() -> userService.deleteUser(999L))
-                .isInstanceOf(UserNotFoundException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Пользователь с id: 999 не найден");
 
         verify(userRepository).existsById(999L);
