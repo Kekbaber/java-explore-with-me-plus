@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.dto.request.NewUserRequest;
 import ru.practicum.main.dto.request.UsersRequest;
 import ru.practicum.main.dto.response.UserDto;
-import ru.practicum.main.exception.user.EmailAlreadyExistsException;
-import ru.practicum.main.exception.user.UserNotFoundException;
+import ru.practicum.main.exception.model.ConflictException;
+import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.User;
 import ru.practicum.main.repository.UserRepository;
 import ru.practicum.main.service.UserService;
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(NewUserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
-            throw new EmailAlreadyExistsException(
+            throw new ConflictException(
                     "Пользователь с email '" + userRequest.getEmail() + "' уже существует"
             );
         }
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("Пользователь с id: " + userId + " не найден");
+            throw new NotFoundException("Пользователь с id: " + userId + " не найден");
         }
         userRepository.deleteById(userId);
     }

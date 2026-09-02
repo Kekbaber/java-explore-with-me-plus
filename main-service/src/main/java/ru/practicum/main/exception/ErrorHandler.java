@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.practicum.main.exception.user.EmailAlreadyExistsException;
-import ru.practicum.main.exception.user.UserNotFoundException;
 import ru.practicum.main.exception.model.ConflictException;
 import ru.practicum.main.exception.model.NotFoundException;
 
@@ -109,19 +107,5 @@ public class ErrorHandler {
         log.error("Конфликт данных: {}", e.getMessage());
         return buildApiError("For the requested operation the conditions are not met.",
                 e.getMessage(), HttpStatus.CONFLICT, request);
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleUserNotFound(final UserNotFoundException e, HttpServletRequest request) {
-        log.error("Пользователь не найден" + ": {}", e.getMessage());
-        return buildApiError("Пользователь не найден", e.getMessage(), HttpStatus.NOT_FOUND, request);
-    }
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleEmailAlreadyExists(final EmailAlreadyExistsException e, HttpServletRequest request) {
-        log.error("Создание пользователя с уже существующим email" + ": {}", e.getMessage());
-        return buildApiError("Создание пользователя с уже существующим email", e.getMessage(), HttpStatus.CONFLICT, request);
     }
 }
