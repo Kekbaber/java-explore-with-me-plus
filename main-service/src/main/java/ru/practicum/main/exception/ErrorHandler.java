@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.main.exception.user.EmailAlreadyExistsException;
+import ru.practicum.main.exception.user.UserNotFoundException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -89,5 +91,19 @@ public class ErrorHandler {
     public ApiError handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpServletRequest r) {
         log.error("Неверный формат JSON: {}", e.getMessage());
         return buildApiError("Неверный формат запроса", e.getMessage(), HttpStatus.BAD_REQUEST, r);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleUserNotFound(final UserNotFoundException e, HttpServletRequest request) {
+        log.error("Пользователь не найден" + ": {}", e.getMessage());
+        return buildApiError("Пользователь не найден", e.getMessage(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleEmailAlreadyExists(final EmailAlreadyExistsException e, HttpServletRequest request) {
+        log.error("Создание пользователя с уже существующим email" + ": {}", e.getMessage());
+        return buildApiError("Создание пользователя с уже существующим email", e.getMessage(), HttpStatus.CONFLICT, request);
     }
 }
