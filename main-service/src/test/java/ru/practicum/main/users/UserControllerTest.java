@@ -129,7 +129,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Создание пользователя с уже существующим email"))
+                .andExpect(jsonPath("$.error").value("For the requested operation the conditions are not met."))
                 .andExpect(jsonPath("$.message").value("Пользователь с email 'existing@example.com' уже существует"));
     }
 
@@ -227,7 +227,7 @@ class UserControllerTest {
 
         mockMvc.perform(delete("/admin/users/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Пользователь не найден"))
+                .andExpect(jsonPath("$.error").value("The required object was not found."))
                 .andExpect(jsonPath("$.message").value("Пользователь с id: 999 не найден"));
     }
 
