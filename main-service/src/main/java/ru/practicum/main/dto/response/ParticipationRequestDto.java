@@ -1,6 +1,5 @@
 package ru.practicum.main.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import ru.practicum.main.model.enums.ParticipationStatus;
 
