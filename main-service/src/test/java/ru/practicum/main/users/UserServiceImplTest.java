@@ -13,6 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.main.service.impl.UserServiceImpl;
 
 import java.util.Arrays;
@@ -90,9 +93,10 @@ class UserServiceImplTest {
     @Test
     void findUsers_ShouldReturnAllUsers_WithPagination() {
         UsersRequest request = new UsersRequest(null, 0, 2);
-        List<User> users = Arrays.asList(user1, user2, user3);
+        List<User> users = Arrays.asList(user1, user2);
+        Page<User> userPage = new PageImpl<>(users);
 
-        when(userRepository.findAllOrdered()).thenReturn(users);
+        when(userRepository.findAllOrdered(any(Pageable.class))).thenReturn(userPage);
 
         List<UserDto> result = userService.findUsers(request);
 
@@ -102,16 +106,17 @@ class UserServiceImplTest {
         assertThat(result.get(1).getId()).isEqualTo(2L);
         assertThat(result.get(1).getName()).isEqualTo("Jane Smith");
 
-        verify(userRepository).findAllOrdered();
-        verify(userRepository, never()).findByIds(any());
+        verify(userRepository).findAllOrdered(any(Pageable.class));
+        verify(userRepository, never()).findByIds(any(), any());
     }
 
     @Test
     void findUsers_ShouldReturnSecondPage() {
         UsersRequest request = new UsersRequest(null, 2, 2);
-        List<User> users = Arrays.asList(user1, user2, user3);
+        List<User> users = Arrays.asList(user3);
+        Page<User> userPage = new PageImpl<>(users);
 
-        when(userRepository.findAllOrdered()).thenReturn(users);
+        when(userRepository.findAllOrdered(any(Pageable.class))).thenReturn(userPage);
 
         List<UserDto> result = userService.findUsers(request);
 
@@ -121,11 +126,11 @@ class UserServiceImplTest {
     }
 
     @Test
-    void findUsers_ShouldReturnEmpty_WhenFromOutOfBounds() {
+    void findUsers_ShouldReturnEmpty_WhenPageOutOfBounds() {
         UsersRequest request = new UsersRequest(null, 10, 20);
-        List<User> users = Arrays.asList(user1, user2, user3);
+        Page<User> emptyPage = Page.empty();
 
-        when(userRepository.findAllOrdered()).thenReturn(users);
+        when(userRepository.findAllOrdered(any(Pageable.class))).thenReturn(emptyPage);
 
         List<UserDto> result = userService.findUsers(request);
 
@@ -140,8 +145,9 @@ class UserServiceImplTest {
         request.setSize(null);
 
         List<User> users = Arrays.asList(user1, user2, user3);
+        Page<User> userPage = new PageImpl<>(users);
 
-        when(userRepository.findAllOrdered()).thenReturn(users);
+        when(userRepository.findAllOrdered(any(Pageable.class))).thenReturn(userPage);
 
         List<UserDto> result = userService.findUsers(request);
 
@@ -156,8 +162,9 @@ class UserServiceImplTest {
         List<Long> ids = Arrays.asList(1L, 3L);
         UsersRequest request = new UsersRequest(ids, 0, 20);
         List<User> users = Arrays.asList(user1, user3);
+        Page<User> userPage = new PageImpl<>(users);
 
-        when(userRepository.findByIds(ids)).thenReturn(users);
+        when(userRepository.findByIds(eq(ids), any(Pageable.class))).thenReturn(userPage);
 
         List<UserDto> result = userService.findUsers(request);
 
@@ -165,23 +172,39 @@ class UserServiceImplTest {
         assertThat(result.get(0).getId()).isEqualTo(1L);
         assertThat(result.get(1).getId()).isEqualTo(3L);
 
-        verify(userRepository).findByIds(ids);
-        verify(userRepository, never()).findAllOrdered();
+        verify(userRepository).findByIds(eq(ids), any(Pageable.class));
+        verify(userRepository, never()).findAllOrdered(any());
     }
 
     @Test
     void findUsers_ShouldReturnFilteredAndPaginatedUsers() {
         List<Long> ids = Arrays.asList(1L, 2L, 3L);
         UsersRequest request = new UsersRequest(ids, 1, 1);
-        List<User> users = Arrays.asList(user1, user2, user3);
+        List<User> users = Arrays.asList(user2);
+        Page<User> userPage = new PageImpl<>(users);
 
-        when(userRepository.findByIds(ids)).thenReturn(users);
+        when(userRepository.findByIds(eq(ids), any(Pageable.class))).thenReturn(userPage);
 
         List<UserDto> result = userService.findUsers(request);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(2L);
         assertThat(result.get(0).getName()).isEqualTo("Jane Smith");
+    }
+
+    @Test
+    void findUsers_ShouldHandleEmptyIdsList() {
+        UsersRequest request = new UsersRequest(Arrays.asList(), 0, 20);
+        List<User> users = Arrays.asList(user1, user2, user3);
+        Page<User> userPage = new PageImpl<>(users);
+
+        when(userRepository.findAllOrdered(any(Pageable.class))).thenReturn(userPage);
+
+        List<UserDto> result = userService.findUsers(request);
+
+        assertThat(result).hasSize(3);
+        verify(userRepository).findAllOrdered(any(Pageable.class));
+        verify(userRepository, never()).findByIds(any(), any());
     }
 
     @Test

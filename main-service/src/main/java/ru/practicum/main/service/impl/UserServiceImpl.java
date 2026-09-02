@@ -1,6 +1,9 @@
 package ru.practicum.main.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.dto.request.NewUserRequest;
@@ -15,11 +18,14 @@ import ru.practicum.main.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service  // Добавлено
-@RequiredArgsConstructor  // Добавлено для инъекции через конструктор
-@Transactional  // Добавлено на уровень класса
+@Service
+@RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;  // Добавлен final
+    private static final int DEFAULT_REQUEST_FROM = 0;
+    private static final int DEFAULT_REQUEST_SIZE = 20;
+
+    private final UserRepository userRepository;
 
     @Override
     public UserDto createUser(NewUserRequest userRequest) {
@@ -40,27 +46,24 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> findUsers(UsersRequest request) {
-        List<User> users;
 
-        // Получаем пользователей с фильтром или всех
+        int from = request.getFrom() != null ? request.getFrom() : DEFAULT_REQUEST_FROM;
+        int size = request.getSize() != null ? request.getSize() : DEFAULT_REQUEST_SIZE;
+
+        int pageNumber = from / size;
+        Pageable pageable = PageRequest.of(pageNumber, size);
+
+        Page<User> userPage;
+
+
         if (request.getIds() != null && !request.getIds().isEmpty()) {
-            users = userRepository.findByIds(request.getIds());
+            userPage = userRepository.findByIds(request.getIds(), pageable);
         } else {
-            users = userRepository.findAllOrdered();
+            userPage = userRepository.findAllOrdered(pageable);
         }
 
 
-        int from = request.getFrom() != null ? request.getFrom() : 0;
-        int size = request.getSize() != null ? request.getSize() : 20;
-
-
-        if (from >= users.size()) {
-            return List.of();
-        }
-
-        int to = Math.min(from + size, users.size());
-
-        return users.subList(from, to).stream()
+        return userPage.getContent().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
