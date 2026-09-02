@@ -9,13 +9,15 @@ import ru.practicum.main.model.Category;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CategoryMapper {
     public static Category mapToCategory(NewCategoryDto newCategoryDto) {
-        if (newCategoryDto != null && newCategoryDto.getName() != null) {
-            return Category.builder()
-                    .name(newCategoryDto.getName())
-                    .build();
-        } else {
-            return null;
-        }
+        return Category.builder()
+                .name(newCategoryDto.getName())
+                .build();
+    }
+
+    public static Category mapToCategory(CategoryDto newCategoryDto) {
+        return Category.builder()
+                .name(newCategoryDto.getName())
+                .build();
     }
 
     public static CategoryDto mapToCategoryDto(Category category) {

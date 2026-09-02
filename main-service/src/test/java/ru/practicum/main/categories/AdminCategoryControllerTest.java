@@ -130,7 +130,7 @@ class AdminCategoryControllerTest {
 
         CategoryDto response = new CategoryDto(1L, "Обновленные концерты");
 
-        when(categoryService.updateCategory(anyLong(), any(NewCategoryDto.class))).thenReturn(response);
+        when(categoryService.updateCategory(anyLong(), any(CategoryDto.class))).thenReturn(response);
 
         mockMvc.perform(patch("/admin/categories/1")
                         .contentType(MediaType.APPLICATION_JSON)

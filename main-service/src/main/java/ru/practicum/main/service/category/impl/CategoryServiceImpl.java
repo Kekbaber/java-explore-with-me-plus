@@ -42,19 +42,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryDto updateCategory(Long catId, NewCategoryDto update) {
+    public CategoryDto updateCategory(Long catId, CategoryDto update) {
         Category oldCategory = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_EXCEPTION + catId));
 
         Category updateCategory = CategoryMapper.mapToCategory(update);
 
-        if (updateCategory != null) {
-            if (categoryRepository.existsByName(updateCategory.getName())) {
-                throw new ConflictException(CATEGORY_CONFLICT_EXCEPTION + updateCategory.getName());
-            }
-
-            oldCategory.setName(updateCategory.getName());
+        if (categoryRepository.existsByName(updateCategory.getName())) {
+            throw new ConflictException(CATEGORY_CONFLICT_EXCEPTION + updateCategory.getName());
         }
+
+        oldCategory.setName(updateCategory.getName());
 
         oldCategory = categoryRepository.save(oldCategory);
 

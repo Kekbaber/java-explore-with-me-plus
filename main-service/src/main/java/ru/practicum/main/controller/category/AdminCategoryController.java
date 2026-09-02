@@ -15,7 +15,7 @@ import ru.practicum.main.service.category.CategoryService;
 @Validated
 @RequestMapping(path = "/admin/categories")
 public class AdminCategoryController {
-    public final CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -32,7 +32,7 @@ public class AdminCategoryController {
     @PatchMapping("/{catId}")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDto updateCategory(@PathVariable @Positive Long catId,
-                                      @Valid @RequestBody NewCategoryDto updateCategory) {
+                                      @Valid @RequestBody CategoryDto updateCategory) {
         return categoryService.updateCategory(catId, updateCategory);
     }
 }

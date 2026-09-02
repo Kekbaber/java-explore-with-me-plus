@@ -79,7 +79,7 @@ class CategoryServiceTest {
 
     @Test
     void updateCategory_ShouldReturnUpdatedCategoryDto_WhenCategoryExists() {
-        NewCategoryDto updateDto = new NewCategoryDto();
+        CategoryDto updateDto = new CategoryDto();
         updateDto.setName("Обновленные концерты");
 
         Category updatedCategory = Category.builder()
@@ -101,7 +101,7 @@ class CategoryServiceTest {
 
     @Test
     void updateCategory_ShouldThrowNotFoundException_WhenCategoryDoesNotExist() {
-        NewCategoryDto updateDto = new NewCategoryDto();
+        CategoryDto updateDto = new CategoryDto();
         updateDto.setName("Обновленные концерты");
 
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
@@ -111,22 +111,6 @@ class CategoryServiceTest {
 
         assertEquals("Category was not found with id=999", exception.getMessage());
         verify(categoryRepository, never()).save(any(Category.class));
-    }
-
-    @Test
-    void updateCategory_ShouldNotUpdateName_WhenNameIsNull() {
-        NewCategoryDto updateDto = new NewCategoryDto();
-        updateDto.setName(null);
-
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(categoryRepository.save(any(Category.class))).thenReturn(category);
-
-        CategoryDto result = categoryService.updateCategory(1L, updateDto);
-
-        assertEquals("Концерты", result.getName());
-        verify(categoryRepository).save(argThat(savedCategory ->
-                savedCategory.getName().equals("Концерты")
-        ));
     }
 
     // ==================== ТЕСТЫ ДЛЯ deleteCategory ====================

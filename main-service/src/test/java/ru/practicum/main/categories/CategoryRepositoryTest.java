@@ -135,35 +135,4 @@ class CategoryRepositoryTest {
 
         assertEquals(3, count);
     }
-
-    // ==================== ТЕСТЫ ДЛЯ СПЕЦИФИЧЕСКИХ МЕТОДОВ ====================
-
-    @Test
-    void findByName_ShouldReturnCategory_WhenNameExists() {
-        // Добавляем метод в репозиторий:
-        // Optional<Category> findByName(String name);
-
-        // Optional<Category> found = categoryRepository.findByName("Концерты");
-        // assertTrue(found.isPresent());
-        // assertEquals(category1.getId(), found.get().getId());
-    }
-
-    @Test
-    void existsByName_ShouldReturnTrue_WhenNameExists() {
-        // Добавляем метод в репозиторий:
-        // boolean existsByName(String name);
-
-        // boolean exists = categoryRepository.existsByName("Концерты");
-        // assertTrue(exists);
-    }
-
-    @Test
-    void findByNameContainingIgnoreCase_ShouldReturnCategories_WhenNameContains() {
-        // Добавляем метод в репозиторий:
-        // List<Category> findByNameContainingIgnoreCase(String name);
-
-        // List<Category> found = categoryRepository.findByNameContainingIgnoreCase("Кон");
-        // assertThat(found).hasSize(1);
-        // assertEquals("Концерты", found.get(0).getName());
-    }
 }
