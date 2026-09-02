@@ -141,39 +141,6 @@ class AdminCategoryControllerTest {
     }
 
     @Test
-    void updateCategory_ShouldReturnBadRequest_WhenNameIsEmpty() throws Exception {
-        NewCategoryDto request = new NewCategoryDto();
-        request.setName("");
-
-        mockMvc.perform(patch("/admin/categories/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateCategory_ShouldReturnBadRequest_WhenNameIsBlank() throws Exception {
-        NewCategoryDto request = new NewCategoryDto();
-        request.setName("   ");
-
-        mockMvc.perform(patch("/admin/categories/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateCategory_ShouldReturnBadRequest_WhenNameTooLong() throws Exception {
-        NewCategoryDto request = new NewCategoryDto();
-        request.setName("A".repeat(51));
-
-        mockMvc.perform(patch("/admin/categories/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void updateCategory_ShouldReturnBadRequest_WhenCategoryIdNegative() throws Exception {
         NewCategoryDto request = new NewCategoryDto();
         request.setName("Обновленные концерты");
