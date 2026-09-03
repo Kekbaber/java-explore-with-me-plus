@@ -1,4 +1,4 @@
-package ru.practicum.main.controller.category;
+package ru.practicum.main.controller;
 
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.dto.response.CategoryDto;
-import ru.practicum.main.service.category.CategoryService;
+import ru.practicum.main.service.CategoryService;
 
 import java.util.List;
 
@@ -14,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping(path = "/categories")
-
 public class PublicCategoryController {
     private final CategoryService categoryService;
 

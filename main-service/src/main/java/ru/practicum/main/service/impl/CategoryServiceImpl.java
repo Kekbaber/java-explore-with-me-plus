@@ -1,4 +1,4 @@
-package ru.practicum.main.service.category.impl;
+package ru.practicum.main.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,8 +12,8 @@ import ru.practicum.main.exception.model.ConflictException;
 import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.Category;
 import ru.practicum.main.repository.CategoryRepository;
-import ru.practicum.main.service.category.CategoryService;
-import ru.practicum.main.service.category.mapper.CategoryMapper;
+import ru.practicum.main.service.CategoryService;
+import ru.practicum.main.service.mapper.CategoryMapper;
 
 import java.util.List;
 
@@ -33,11 +33,11 @@ public class CategoryServiceImpl implements CategoryService {
             throw new ConflictException(CATEGORY_CONFLICT_EXCEPTION + newCategory.getName());
         }
 
-        Category category = CategoryMapper.mapToCategory(newCategory);
+        Category category = CategoryMapper.toEntity(newCategory);
 
         category = categoryRepository.save(category);
 
-        return CategoryMapper.mapToCategoryDto(category);
+        return CategoryMapper.toDto(category);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category oldCategory = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_EXCEPTION + catId));
 
-        Category updateCategory = CategoryMapper.mapToCategory(update);
+        Category updateCategory = CategoryMapper.toEntity(update);
 
         if (categoryRepository.existsByName(updateCategory.getName())) {
             throw new ConflictException(CATEGORY_CONFLICT_EXCEPTION + updateCategory.getName());
@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         oldCategory = categoryRepository.save(oldCategory);
 
-        return CategoryMapper.mapToCategoryDto(oldCategory);
+        return CategoryMapper.toDto(oldCategory);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         // Возвращаем список категорий с этой страницы
         return page.getContent().stream()
-                .map(CategoryMapper::mapToCategoryDto)
+                .map(CategoryMapper::toDto)
                 .toList();
     }
 
@@ -87,6 +87,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_EXCEPTION + catId));
 
-        return CategoryMapper.mapToCategoryDto(category);
+        return CategoryMapper.toDto(category);
     }
 }

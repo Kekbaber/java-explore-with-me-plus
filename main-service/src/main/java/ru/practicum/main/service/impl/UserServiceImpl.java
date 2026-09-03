@@ -14,13 +14,13 @@ import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.User;
 import ru.practicum.main.repository.UserRepository;
 import ru.practicum.main.service.UserService;
+import ru.practicum.main.service.mapper.UserMapper;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private static final int DEFAULT_REQUEST_FROM = 0;
     private static final int DEFAULT_REQUEST_SIZE = 20;
@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDto createUser(NewUserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new ConflictException(
@@ -40,11 +41,10 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userRequest.getEmail());
 
         User savedUser = userRepository.save(user);
-        return convertToDto(savedUser);
+        return UserMapper.toDto(savedUser);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> findUsers(UsersRequest request) {
 
         int from = request.getFrom() != null ? request.getFrom() : DEFAULT_REQUEST_FROM;
@@ -64,11 +64,12 @@ public class UserServiceImpl implements UserService {
 
 
         return userPage.getContent().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+                .map(UserMapper::toDto)
+                .toList();
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id: " + userId + " не найден");
@@ -76,11 +77,5 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
     }
 
-    private UserDto convertToDto(User user) {
-        return new UserDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail()
-        );
-    }
+
 }

@@ -1,7 +1,7 @@
 package ru.practicum.main.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ru.practicum.main.controller.UserController;
+import ru.practicum.main.controller.AdminUserController;
 import ru.practicum.main.dto.request.NewUserRequest;
 import ru.practicum.main.dto.request.UsersRequest;
 import ru.practicum.main.dto.response.UserDto;
@@ -25,8 +25,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(UserController.class)
-class UserControllerTest {
+@WebMvcTest(AdminUserController.class)
+class AdminUserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

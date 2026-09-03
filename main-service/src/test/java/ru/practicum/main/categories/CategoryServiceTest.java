@@ -15,7 +15,7 @@ import ru.practicum.main.dto.response.CategoryDto;
 import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.Category;
 import ru.practicum.main.repository.CategoryRepository;
-import ru.practicum.main.service.category.impl.CategoryServiceImpl;
+import ru.practicum.main.service.impl.CategoryServiceImpl;
 
 import java.util.List;
 import java.util.Optional;

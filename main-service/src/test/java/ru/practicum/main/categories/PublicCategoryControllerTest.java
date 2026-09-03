@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.main.controller.category.PublicCategoryController;
+import ru.practicum.main.controller.PublicCategoryController;
 import ru.practicum.main.dto.response.CategoryDto;
 import ru.practicum.main.exception.model.NotFoundException;
-import ru.practicum.main.service.category.CategoryService;
+import ru.practicum.main.service.CategoryService;
 
 import java.util.Arrays;
 import java.util.List;

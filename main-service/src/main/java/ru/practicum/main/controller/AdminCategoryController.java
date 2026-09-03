@@ -1,4 +1,4 @@
-package ru.practicum.main.controller.category;
+package ru.practicum.main.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -8,7 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.dto.request.NewCategoryDto;
 import ru.practicum.main.dto.response.CategoryDto;
-import ru.practicum.main.service.category.CategoryService;
+import ru.practicum.main.service.CategoryService;
 
 @RestController
 @RequiredArgsConstructor

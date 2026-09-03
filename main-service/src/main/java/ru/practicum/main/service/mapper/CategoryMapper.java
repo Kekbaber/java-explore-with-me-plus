@@ -1,4 +1,4 @@
-package ru.practicum.main.service.category.mapper;
+package ru.practicum.main.service.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -8,26 +8,25 @@ import ru.practicum.main.model.Category;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CategoryMapper {
-    public static Category mapToCategory(NewCategoryDto newCategoryDto) {
+    public static Category toEntity(NewCategoryDto newCategoryDto) {
         return Category.builder()
                 .name(newCategoryDto.getName())
                 .build();
     }
 
-    public static Category mapToCategory(CategoryDto newCategoryDto) {
+    public static Category toEntity(CategoryDto newCategoryDto) {
         return Category.builder()
                 .name(newCategoryDto.getName())
                 .build();
     }
 
-    public static CategoryDto mapToCategoryDto(Category category) {
-        if (category != null && category.getName() != null && category.getId() != null) {
-            return CategoryDto.builder()
-                    .id(category.getId())
-                    .name(category.getName())
-                    .build();
-        } else {
+    public static CategoryDto toDto(Category category) {
+        if (category == null) {
             return null;
         }
+        return CategoryDto.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .build();
     }
 }
