@@ -23,7 +23,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private static final int DEFAULT_REQUEST_FROM = 0;
-    private static final int DEFAULT_REQUEST_SIZE = 20;
+    private static final int DEFAULT_REQUEST_SIZE = 10;
 
     private final UserRepository userRepository;
 
