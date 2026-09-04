@@ -34,13 +34,16 @@ public class Event {
     private LocalDateTime publishedOn;
 
     @Column(nullable = false)
-    private Boolean paid;
+    @Builder.Default
+    private Boolean paid = false;
 
     @Column(name = "participant_limit", nullable = false)
-    private Integer participantLimit;
+    @Builder.Default
+    private Integer participantLimit = 0;
 
     @Column(name = "request_moderation", nullable = false)
-    private Boolean requestModeration;
+    @Builder.Default
+    private Boolean requestModeration = true;
 
     @Column(nullable = false, length = 120)
     private String title;
