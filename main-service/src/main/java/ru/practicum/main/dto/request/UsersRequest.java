@@ -18,6 +18,6 @@ public class UsersRequest {
     private Integer from = 0;
 
     @Min(value = 1, message = "Size must be >= 1")
-    private Integer size = 20;
+    private Integer size = 10;
 
 }
