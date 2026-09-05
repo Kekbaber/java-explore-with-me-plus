@@ -101,7 +101,7 @@ public class EventServiceImpl implements EventService {
 
         LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
         if (newEvent.getEventDate() == null || newEvent.getEventDate().isBefore(now.plusHours(2))) {
-            throw new ConflictException(String.format(EVENT_DATE_IN_PAST_EXCEPTION, newEvent.getEventDate()));
+            throw new IllegalArgumentException(String.format(EVENT_DATE_IN_PAST_EXCEPTION, newEvent.getEventDate()));
         }
 
         Event event = EventMapper.toEntity(newEvent, initiator, category);
@@ -125,11 +125,11 @@ public class EventServiceImpl implements EventService {
         Event event = getUserEventOrThrow(userId, eventId);
 
         if (event.getState() == EventState.PUBLISHED) {
-            throw new IllegalArgumentException(EVENT_MUST_NOT_BE_PUBLISHED);
+            throw new ConflictException(EVENT_MUST_NOT_BE_PUBLISHED);
         }
 
         if (update.getEventDate() != null && update.getEventDate().isBefore(LocalDateTime.now(ZoneId.systemDefault()).plusHours(2))) {
-            throw new ConflictException(String.format(EVENT_DATE_IN_PAST_EXCEPTION, update.getEventDate()));
+            throw new IllegalArgumentException(String.format(EVENT_DATE_IN_PAST_EXCEPTION, update.getEventDate()));
         }
 
         applyUpdate(event, update);
@@ -190,11 +190,25 @@ public class EventServiceImpl implements EventService {
             return new EventRequestStatusUpdateResult(confirmed, rejected);
         }
 
+        if (event.getParticipantLimit() > 0
+                && participationRequestRepository
+                .countByEventIdAndStatus(eventId, ParticipationStatus.CONFIRMED) >= event.getParticipantLimit()) {
+            throw new ConflictException("The participant limit has been reached");
+        }
+
         participationRequestRepository.confirmRequestsAtomically(
                 request.getRequestIds(), eventId, event.getParticipantLimit());
 
-        if (event.getParticipantLimit() > 0) {
-            participationRequestRepository.rejectRemainingPending(eventId, request.getRequestIds());
+        long confirmedTotal = participationRequestRepository
+                .countByEventIdAndStatus(eventId, ParticipationStatus.CONFIRMED);
+
+        if (event.getParticipantLimit() > 0 && confirmedTotal >= event.getParticipantLimit()) {
+            List<Long> confirmedIds = participationRequestRepository
+                    .findAllByIdIn(request.getRequestIds()).stream()
+                    .filter(r -> r.getStatus() == ParticipationStatus.CONFIRMED)
+                    .map(ParticipationRequest::getId)
+                    .toList();
+            participationRequestRepository.rejectRemainingPending(eventId, confirmedIds);
         }
 
         List<ParticipationRequest> allAffected = participationRequestRepository
@@ -248,6 +262,11 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest update) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(String.format(EVENT_NOT_FOUND_EXCEPTION, eventId)));
+
+        if (update.getEventDate() != null
+                && update.getEventDate().isBefore(LocalDateTime.now(ZoneId.systemDefault()))) {
+            throw new IllegalArgumentException(String.format(EVENT_DATE_IN_PAST_EXCEPTION, update.getEventDate()));
+        }
 
         if (update.getEventDate() != null
                 && event.getPublishedOn() != null
@@ -326,7 +345,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException(String.format(EVENT_NOT_FOUND_EXCEPTION, eventId));
         }
 
-        saveHit(ip, EVENT_URI + eventId);
+        saveHit(ip, EVENT_URI + "/" + eventId);
 
         return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(eventId));
     }
