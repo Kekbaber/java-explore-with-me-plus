@@ -2,6 +2,9 @@ package ru.practicum.main.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 import ru.practicum.main.model.enums.ParticipationStatus;
 
 import java.time.LocalDateTime;
@@ -18,7 +21,9 @@ public class ParticipationRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(nullable = false, insertable = false, updatable = false)
+    @Generated(event = {EventType.INSERT})
     private LocalDateTime created;
 
     @Enumerated(EnumType.STRING)

@@ -18,7 +18,6 @@ import ru.practicum.main.repository.UserRepository;
 import ru.practicum.main.service.ParticipationRequestService;
 import ru.practicum.main.service.mapper.ParticipationRequestMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -63,12 +62,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (event.getParticipantLimit() > 0 && confirmed >= event.getParticipantLimit()) {
             throw new ConflictException("Participant limit has been reached");
         }
-        ParticipationStatus initialStatus = event.getRequestModeration()
-                ? ParticipationStatus.PENDING
-                : ParticipationStatus.CONFIRMED;
+        ParticipationStatus initialStatus = (event.getParticipantLimit() == 0 || !event.getRequestModeration())
+                ? ParticipationStatus.CONFIRMED
+                : ParticipationStatus.PENDING;
 
         ParticipationRequest request = ParticipationRequest.builder()
-                .created(LocalDateTime.now())
                 .event(event)
                 .requester(requester)
                 .status(initialStatus)

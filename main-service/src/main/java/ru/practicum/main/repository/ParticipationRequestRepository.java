@@ -27,7 +27,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
     List<Object[]> countByEventIdsAndStatus(@Param("eventIds") List<Long> eventIds,
                                             @Param("status") ParticipationStatus status);
 
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "UPDATE participation_requests " +
             "SET status = 'CONFIRMED' " +
             "WHERE id IN (:ids) " +
@@ -40,7 +40,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
                                   @Param("eventId") Long eventId,
                                   @Param("limit") int limit);
 
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "UPDATE participation_requests " +
             "SET status = 'REJECTED' " +
             "WHERE event_id = :eventId " +
