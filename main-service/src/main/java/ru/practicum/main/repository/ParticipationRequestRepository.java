@@ -10,6 +10,7 @@ import ru.practicum.main.model.enums.ParticipationStatus;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
@@ -24,7 +25,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             "WHERE r.event.id IN :eventIds AND r.status = :status " +
             "GROUP BY r.event.id")
     List<Object[]> countByEventIdsAndStatus(@Param("eventIds") List<Long> eventIds,
-                                             @Param("status") ParticipationStatus status);
+                                            @Param("status") ParticipationStatus status);
 
     @Modifying
     @Query(value = "UPDATE participation_requests " +
@@ -47,4 +48,8 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             "AND id NOT IN (:excludeIds)", nativeQuery = true)
     int rejectRemainingPending(@Param("eventId") Long eventId,
                                @Param("excludeIds") List<Long> excludeIds);
+
+    List<ParticipationRequest> findAllByRequesterId(Long requesterId);
+
+    Optional<ParticipationRequest> findByEventIdAndRequesterId(Long eventId, Long requesterId);
 }
