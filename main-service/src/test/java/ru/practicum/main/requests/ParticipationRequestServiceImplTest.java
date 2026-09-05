@@ -116,8 +116,9 @@ class ParticipationRequestServiceImplTest {
     }
 
     @Test
-    void createRequest_ShouldReturnPending_WhenModerationEnabled() {
+    void createRequest_ShouldReturnPending_WhenModerationEnabledAndLimitNotZero() {
         event.setRequestModeration(true);
+        event.setParticipantLimit(5);
         when(userRepository.findById(2L)).thenReturn(Optional.of(anotherUser));
         when(eventRepository.findById(10L)).thenReturn(Optional.of(event));
         when(requestRepository.findByEventIdAndRequesterId(10L, 2L)).thenReturn(Optional.empty());

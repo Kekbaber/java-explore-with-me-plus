@@ -176,7 +176,7 @@ class EventServiceImplTest {
     }
 
     @Test
-    void addEvent_ShouldThrowConflictException_WhenEventDateInPast() {
+    void addEvent_ShouldThrowIllegalArgumentException_WhenEventDateInPast() {
         NewEventDto newEvent = NewEventDto.builder()
                 .annotation("Test annotation for the event")
                 .category(1L)
@@ -190,14 +190,14 @@ class EventServiceImplTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
 
         assertThatThrownBy(() -> eventService.addEvent(1L, newEvent))
-                .isInstanceOf(ConflictException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("eventDate");
 
         verify(eventRepository, never()).save(any());
     }
 
     @Test
-    void addEvent_ShouldThrowConflictException_WhenEventDateTooSoon() {
+    void addEvent_ShouldThrowIllegalArgumentException_WhenEventDateTooSoon() {
         NewEventDto newEvent = NewEventDto.builder()
                 .annotation("Test annotation for the event")
                 .category(1L)
@@ -211,7 +211,7 @@ class EventServiceImplTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
 
         assertThatThrownBy(() -> eventService.addEvent(1L, newEvent))
-                .isInstanceOf(ConflictException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("eventDate");
 
         verify(eventRepository, never()).save(any());
@@ -333,7 +333,7 @@ class EventServiceImplTest {
     }
 
     @Test
-    void updateUserEvent_ShouldThrowIllegalArgumentException_WhenEventIsPublished() {
+    void updateUserEvent_ShouldThrowConflictException_WhenEventIsPublished() {
         event.setState(EventState.PUBLISHED);
 
         UpdateEventUserRequest update = UpdateEventUserRequest.builder()
@@ -343,12 +343,12 @@ class EventServiceImplTest {
         when(eventRepository.findByEventIdAndInitiatorId(1L, 1L)).thenReturn(Optional.of(event));
 
         assertThatThrownBy(() -> eventService.updateUserEvent(1L, 1L, update))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("Event must not be published");
     }
 
     @Test
-    void updateUserEvent_ShouldThrowConflictException_WhenEventDateTooSoon() {
+    void updateUserEvent_ShouldThrowIllegalArgumentException_WhenEventDateTooSoon() {
         UpdateEventUserRequest update = UpdateEventUserRequest.builder()
                 .eventDate(baseTime.plusHours(1))
                 .build();
@@ -356,7 +356,7 @@ class EventServiceImplTest {
         when(eventRepository.findByEventIdAndInitiatorId(1L, 1L)).thenReturn(Optional.of(event));
 
         assertThatThrownBy(() -> eventService.updateUserEvent(1L, 1L, update))
-                .isInstanceOf(ConflictException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("eventDate");
     }
 
