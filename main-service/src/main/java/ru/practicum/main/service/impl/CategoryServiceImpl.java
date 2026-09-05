@@ -48,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category updateCategory = CategoryMapper.toEntity(update);
 
-        if (categoryRepository.existsByName(updateCategory.getName())) {
+        if (categoryRepository.existsByNameAndIdNot(updateCategory.getName(), catId)) {
             throw new ConflictException(CATEGORY_CONFLICT_EXCEPTION + updateCategory.getName());
         }
 
