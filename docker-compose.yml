@@ -29,11 +29,39 @@ services:
       stats-db:
         condition: service_healthy
 
-#  ewm-service:        # закомментировано до второго этапа
-#    ports:
-#      - "8080:8080"
-#  ewm-db:             # закомментировано до второго этапа
-#    image: postgres:16.1
+  ewm-db:
+    image: postgres:16.1
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=ewm-main
+      - POSTGRES_USER=ewm
+      - POSTGRES_PASSWORD=ewm
+    volumes:
+      - main-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ewm -d ewm-main" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ewm-service:
+    build:
+      context: .
+      dockerfile: main-service/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main
+      - SPRING_DATASOURCE_USERNAME=ewm
+      - SPRING_DATASOURCE_PASSWORD=ewm
+      - STATS_SERVER_URL=http://stats-server:9090
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+      stats-server:
+        condition: service_started
 
 volumes:
   stats-db-data:
+  main-db-data:
