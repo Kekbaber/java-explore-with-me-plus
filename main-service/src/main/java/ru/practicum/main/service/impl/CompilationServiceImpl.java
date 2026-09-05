@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.dto.request.NewCompilationDto;
 import ru.practicum.main.dto.request.UpdateCompilationRequest;
 import ru.practicum.main.dto.response.CompilationDto;
+import ru.practicum.main.exception.model.ConflictException;
 import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.Compilation;
 import ru.practicum.main.model.Event;
@@ -33,6 +34,10 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         log.info("Creating new compilation with title: {}", newCompilationDto.getTitle());
 
+        if (compilationRepository.existsByTitle(newCompilationDto.getTitle())) {
+            throw new ConflictException("Compilation with title '" + newCompilationDto.getTitle() + "' already exists");
+        }
+
         // Получаем события по ID, если они указаны
         List<Event> events = getEventsOrThrow(newCompilationDto.getEvents());
 
@@ -56,6 +61,9 @@ public class CompilationServiceImpl implements CompilationService {
 
         // Обновляем только переданные поля (не null)
         if (request.getTitle() != null) {
+            if (compilationRepository.existsByTitleAndIdNot(request.getTitle(), compId)) {
+                throw new ConflictException("Compilation with title '" + request.getTitle() + "' already exists");
+            }
             compilation.setTitle(request.getTitle());
         }
 
@@ -110,7 +118,10 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto getCompilationById(Long compId) {
         log.info("Getting compilation by id: {}", compId);
 
-        Compilation compilation = getCompilationOrThrow(compId);
+        // Используем метод с EntityGraph для загрузки событий одним запросом
+        Compilation compilation = compilationRepository.findById(compId)
+                .orElseThrow(() -> new NotFoundException("Compilation not found with id: " + compId));
+
         return CompilationMapper.toDto(compilation);
     }
 

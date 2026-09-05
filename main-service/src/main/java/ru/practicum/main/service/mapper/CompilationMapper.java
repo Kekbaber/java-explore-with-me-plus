@@ -6,6 +6,7 @@ import ru.practicum.main.dto.response.CompilationDto;
 import ru.practicum.main.dto.response.EventShortDto;
 import ru.practicum.main.model.Compilation;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,10 @@ public class CompilationMapper {
 
         List<EventShortDto> eventShortDtos = compilation.getEvents().stream()
                 .map(event -> EventMapper.toShortDto(event, 0L, 0L))
-                .collect(Collectors.toList());
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        Collections::unmodifiableList
+                ));
 
         return CompilationDto.builder()
                 .id(compilation.getId())

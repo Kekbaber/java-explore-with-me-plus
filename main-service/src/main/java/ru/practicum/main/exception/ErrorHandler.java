@@ -3,6 +3,7 @@ package ru.practicum.main.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -107,5 +108,27 @@ public class ErrorHandler {
         log.error("Конфликт данных: {}", e.getMessage());
         return buildApiError("For the requested operation the conditions are not met.",
                 e.getMessage(), HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleDataIntegrityViolation(final DataIntegrityViolationException e, HttpServletRequest request) {
+        log.error("Нарушение целостности данных: {}", e.getMessage());
+
+        String message = "For the requested operation the conditions are not met.";
+
+
+        if (e.getMessage() != null &&
+                (e.getMessage().contains("UK_compilation_title") ||
+                        e.getMessage().contains("duplicate key"))) {
+            message = "Compilation with this title already exists";
+        }
+
+        return buildApiError(
+                "For the requested operation the conditions are not met.",
+                message,
+                HttpStatus.CONFLICT,
+                request
+        );
     }
 }
