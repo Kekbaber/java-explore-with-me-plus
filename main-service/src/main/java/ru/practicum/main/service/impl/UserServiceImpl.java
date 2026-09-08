@@ -22,9 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-    private static final int DEFAULT_REQUEST_FROM = 0;
-    private static final int DEFAULT_REQUEST_SIZE = 10;
-
     private final UserRepository userRepository;
 
     @Override
@@ -46,9 +43,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findUsers(UsersRequest request) {
-
-        int from = request.getFrom() != null ? request.getFrom() : DEFAULT_REQUEST_FROM;
-        int size = request.getSize() != null ? request.getSize() : DEFAULT_REQUEST_SIZE;
+        int from = request.getFrom() != null ? request.getFrom() : 0;
+        int size = request.getSize() != null && request.getSize() > 0 ? request.getSize() : 10;
 
         int pageNumber = from / size;
         Pageable pageable = PageRequest.of(pageNumber, size);
