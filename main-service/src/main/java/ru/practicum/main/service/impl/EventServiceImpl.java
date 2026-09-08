@@ -31,7 +31,6 @@ import ru.practicum.main.service.EventService;
 import ru.practicum.main.service.mapper.EventMapper;
 import ru.practicum.main.service.mapper.ParticipationRequestMapper;
 import ru.practicum.stat.client.StatClient;
-import ru.practicum.stat.dto.EndpointHit;
 import ru.practicum.stat.dto.ViewStats;
 
 import java.time.LocalDateTime;
@@ -62,8 +61,6 @@ public class EventServiceImpl implements EventService {
     private static final String REQUEST_IDS_NOT_FOUND = "One or more request IDs were not found or do not belong to this event";
 
     private static final DateTimeFormatter STAT_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final String STAT_APP = "ewm-main-service";
-    private static final String EVENT_URI = "/events";
     private static final int STATS_YEARS_RANGE = 10;
     private static final LocalDateTime DEFAULT_START = LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0);
     private static final LocalDateTime DEFAULT_END = LocalDateTime.of(2100, Month.JANUARY, 1, 0, 0);
@@ -331,7 +328,7 @@ public class EventServiceImpl implements EventService {
                     .toList();
         }
 
-        saveHit(ip, EVENT_URI);
+        statClient.saveHit(ip, StatClient.EVENT_URI);
 
         return result;
     }
@@ -345,7 +342,7 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException(String.format(EVENT_NOT_FOUND_EXCEPTION, eventId));
         }
 
-        saveHit(ip, EVENT_URI + "/" + eventId);
+        statClient.saveHit(ip, StatClient.EVENT_URI + "/" + eventId);
 
         return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(eventId));
     }
@@ -393,7 +390,7 @@ public class EventServiceImpl implements EventService {
         LocalDateTime start = LocalDateTime.now(ZoneId.systemDefault()).minusYears(STATS_YEARS_RANGE);
         LocalDateTime end = LocalDateTime.now(ZoneId.systemDefault());
         List<String> uris = eventIds.stream()
-                .map(id -> EVENT_URI + "/" + id)
+                .map(id -> StatClient.EVENT_URI + "/" + id)
                 .toList();
         List<ViewStats> stats = statClient.getStats(
                 start.format(STAT_DATE_FORMATTER),
@@ -407,18 +404,9 @@ public class EventServiceImpl implements EventService {
         return stats.stream()
                 .filter(v -> v.getHits() != null && v.getUri() != null)
                 .collect(Collectors.toMap(
-                        v -> Long.parseLong(v.getUri().replace(EVENT_URI + "/", "")),
+                        v -> Long.parseLong(v.getUri().replace(StatClient.EVENT_URI + "/", "")),
                         ViewStats::getHits
                 ));
-    }
-
-    private void saveHit(String ip, String uri) {
-        statClient.saveHit(EndpointHit.builder()
-                .app(STAT_APP)
-                .uri(uri)
-                .ip(ip)
-                .timestamp(LocalDateTime.now(ZoneId.systemDefault()))
-                .build());
     }
 
     private LocalDateTime parseDateTimeOr(String dateTime, LocalDateTime defaultValue) {

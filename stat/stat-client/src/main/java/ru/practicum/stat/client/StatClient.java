@@ -9,15 +9,28 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stat.dto.EndpointHit;
 import ru.practicum.stat.dto.ViewStats;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
 public class StatClient {
 
+    public static final String EVENT_URI = "/events";
+    private static final String APP = "ewm-main-service";
+
     private final RestClient restClient;
 
     public StatClient(String baseUrl) {
         this.restClient = RestClient.builder().baseUrl(baseUrl).build();
+    }
+
+    public boolean saveHit(String ip, String uri) {
+        return saveHit(EndpointHit.builder()
+                .app(APP)
+                .uri(uri)
+                .ip(ip)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 
     public boolean saveHit(EndpointHit hit) {

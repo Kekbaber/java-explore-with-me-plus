@@ -113,7 +113,7 @@ class EventServiceImplTest {
                 .annotation("Test annotation for the event")
                 .category(1L)
                 .description("Test description for the event which is quite long")
-                .eventDate(baseTime.plusDays(10))
+                .eventDate(LocalDateTime.now().plusDays(10))
                 .location(LocationDto.builder().lat(55.75f).lon(37.62f).build())
                 .paid(false)
                 .participantLimit(0)
@@ -653,7 +653,7 @@ class EventServiceImplTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getState()).isEqualTo(EventState.PUBLISHED);
-        verify(statClient).saveHit(any());
+        verify(statClient).saveHit(anyString(), anyString());
     }
 
     @Test
@@ -698,7 +698,7 @@ class EventServiceImplTest {
         List<EventShortDto> result = eventService.searchPublicEvents(params, "192.168.1.1");
 
         assertThat(result).hasSize(1);
-        verify(statClient).saveHit(any());
+        verify(statClient).saveHit(anyString(), anyString());
     }
 
     @Test
