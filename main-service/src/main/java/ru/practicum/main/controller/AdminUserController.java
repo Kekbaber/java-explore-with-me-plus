@@ -1,5 +1,7 @@
 package ru.practicum.main.controller;
 
+import jakarta.validation.constraints.Min;
+import org.springframework.validation.annotation.Validated;
 import ru.practicum.main.dto.request.NewUserRequest;
 import ru.practicum.main.dto.request.UsersRequest;
 import ru.practicum.main.dto.response.UserDto;
@@ -14,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
+@Validated
 public class AdminUserController {
 
     private final UserService userService;
@@ -26,8 +29,8 @@ public class AdminUserController {
 
     @GetMapping
     public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
-                                  @RequestParam(defaultValue = "0") Integer from,
-                                  @RequestParam(defaultValue = "10") Integer size) {
+                                  @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                  @RequestParam(defaultValue = "10") @Min(1) Integer size) {
 
         UsersRequest request = UsersRequest.builder()
                 .ids(ids)
