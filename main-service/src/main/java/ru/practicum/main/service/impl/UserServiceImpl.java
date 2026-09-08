@@ -43,12 +43,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findUsers(UsersRequest request) {
-        int from = request.getFrom();
-        int size = request.getSize();
-
-        if (size <= 0) {
-            size = 10;
-        }
+        int from = request.getFrom() != null ? request.getFrom() : 0;
+        int size = request.getSize() != null && request.getSize() > 0 ? request.getSize() : 10;
 
         int pageNumber = from / size;
         Pageable pageable = PageRequest.of(pageNumber, size);
