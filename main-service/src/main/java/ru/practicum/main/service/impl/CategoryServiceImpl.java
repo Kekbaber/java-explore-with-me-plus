@@ -12,6 +12,7 @@ import ru.practicum.main.exception.model.ConflictException;
 import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.Category;
 import ru.practicum.main.repository.CategoryRepository;
+import ru.practicum.main.repository.EventRepository;
 import ru.practicum.main.service.CategoryService;
 import ru.practicum.main.service.mapper.CategoryMapper;
 
@@ -25,14 +26,11 @@ public class CategoryServiceImpl implements CategoryService {
     private static final String CATEGORY_CONFLICT_EXCEPTION = "Category already exists with name=";
 
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     @Transactional
     public CategoryDto addCategory(NewCategoryDto newCategory) {
-        if (categoryRepository.existsByName(newCategory.getName())) {
-            throw new ConflictException(CATEGORY_CONFLICT_EXCEPTION + newCategory.getName());
-        }
-
         Category category = CategoryMapper.toEntity(newCategory);
 
         category = categoryRepository.save(category);
@@ -62,11 +60,16 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(Long catId) {
-        if (categoryRepository.existsById(catId)) {
-            categoryRepository.deleteById(catId);
-        } else {
-            throw new NotFoundException(CATEGORY_NOT_FOUND_EXCEPTION + catId);
+        // Проверяем существование категории
+        Category category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_EXCEPTION + catId));
+
+        // Проверяем наличие событий
+        if (eventRepository.existsByCategoryId(catId)) {
+            throw new ConflictException("Category cannot be deleted because it has events");
         }
+
+        categoryRepository.delete(category);
     }
 
     @Override
