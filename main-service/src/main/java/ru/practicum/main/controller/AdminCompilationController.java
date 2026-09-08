@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.dto.request.NewCompilationDto;
+import ru.practicum.main.dto.request.UpdateCompilationRequest;
 import ru.practicum.main.dto.response.CompilationDto;
 import ru.practicum.main.service.CompilationService;
 
@@ -28,7 +29,7 @@ public class AdminCompilationController {
     @ResponseStatus(HttpStatus.OK)
     public CompilationDto updateCompilation(
             @PathVariable Long compId,
-            @Valid @RequestBody NewCompilationDto request) {
+            @Valid @RequestBody UpdateCompilationRequest request) {
         log.info("PATCH /admin/compilations/{} - Updating compilation", compId);
         return compilationService.updateCompilation(compId, request);
     }

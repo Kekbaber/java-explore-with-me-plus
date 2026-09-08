@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.dto.request.NewCompilationDto;
+import ru.practicum.main.dto.request.UpdateCompilationRequest;
 import ru.practicum.main.dto.response.CompilationDto;
 import ru.practicum.main.exception.model.ConflictException;
 import ru.practicum.main.exception.model.NotFoundException;
@@ -53,7 +54,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public CompilationDto updateCompilation(Long compId, NewCompilationDto request) {
+    public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest request) {
         log.info("Updating compilation with id: {}", compId);
 
         Compilation compilation = getCompilationOrThrow(compId);
