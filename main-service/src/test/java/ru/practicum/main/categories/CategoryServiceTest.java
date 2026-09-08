@@ -15,6 +15,7 @@ import ru.practicum.main.dto.response.CategoryDto;
 import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.Category;
 import ru.practicum.main.repository.CategoryRepository;
+import ru.practicum.main.repository.EventRepository;
 import ru.practicum.main.service.impl.CategoryServiceImpl;
 
 import java.util.List;
@@ -29,6 +30,9 @@ class CategoryServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private EventRepository eventRepository;
 
     @InjectMocks
     private CategoryServiceImpl categoryService;
@@ -117,24 +121,35 @@ class CategoryServiceTest {
 
     @Test
     void deleteCategory_ShouldDelete_WhenCategoryExists() {
-        when(categoryRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(categoryRepository).deleteById(1L);
+        Long categoryId = 1L;
+        Category category = new Category();
+        category.setId(categoryId);
+        category.setName("Test Category");
 
-        assertDoesNotThrow(() -> categoryService.deleteCategory(1L));
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
+        when(eventRepository.existsByCategoryId(categoryId)).thenReturn(false);
+        doNothing().when(categoryRepository).delete(category); // или deleteById
 
-        verify(categoryRepository, times(1)).existsById(1L);
-        verify(categoryRepository, times(1)).deleteById(1L);
+        assertDoesNotThrow(() -> categoryService.deleteCategory(categoryId));
+
+        verify(categoryRepository, times(1)).findById(categoryId);
+        verify(eventRepository, times(1)).existsByCategoryId(categoryId);
+        verify(categoryRepository, times(1)).delete(category);
     }
 
     @Test
     void deleteCategory_ShouldThrowNotFoundException_WhenCategoryDoesNotExist() {
-        when(categoryRepository.existsById(999L)).thenReturn(false);
+        Long categoryId = 999L;
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> categoryService.deleteCategory(999L));
+                () -> categoryService.deleteCategory(categoryId));
 
         assertEquals("Category was not found with id=999", exception.getMessage());
-        verify(categoryRepository, never()).deleteById(anyLong());
+        verify(categoryRepository, times(1)).findById(categoryId);
+        verify(eventRepository, never()).existsByCategoryId(anyLong());
+        verify(categoryRepository, never()).delete(any());
     }
 
     // ==================== ТЕСТЫ ДЛЯ getCategories ====================

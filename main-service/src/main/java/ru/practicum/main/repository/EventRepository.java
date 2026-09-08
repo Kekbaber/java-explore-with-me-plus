@@ -20,4 +20,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.id = :eventId AND e.initiator.id = :userId")
     Optional<Event> findByEventIdAndInitiatorId(@Param("eventId") Long eventId,
                                                 @Param("userId") Long userId);
+
+    boolean existsByCategoryId(Long categoryId);
 }
