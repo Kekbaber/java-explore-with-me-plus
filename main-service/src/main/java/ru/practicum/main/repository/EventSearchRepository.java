@@ -75,8 +75,12 @@ public class EventSearchRepository {
         if (filter.categories() != null) {
             where.and(e.category.id.in(filter.categories()));
         }
-        where.and(e.eventDate.goe(filter.rangeStart()));
-        where.and(e.eventDate.loe(filter.rangeEnd()));
+        if (filter.rangeStart() != null) {
+            where.and(e.eventDate.goe(filter.rangeStart()));
+        }
+        if (filter.rangeEnd() != null) {
+            where.and(e.eventDate.loe(filter.rangeEnd()));
+        }
 
         return where;
     }
@@ -99,8 +103,12 @@ public class EventSearchRepository {
         if (filter.paid() != null) {
             where.and(e.paid.eq(filter.paid()));
         }
-        where.and(e.eventDate.goe(filter.rangeStart()));
-        where.and(e.eventDate.loe(filter.rangeEnd()));
+        if (filter.rangeStart() != null) {
+            where.and(e.eventDate.goe(filter.rangeStart()));
+        }
+        if (filter.rangeEnd() != null) {
+            where.and(e.eventDate.loe(filter.rangeEnd()));
+        }
 
         if (Boolean.TRUE.equals(filter.onlyAvailable())) {
             where.and(e.participantLimit.eq(0)

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.main.dto.enums.AdminStateAction;
+import ru.practicum.main.dto.enums.EventSort;
 import ru.practicum.main.dto.enums.EventStateAction;
 import ru.practicum.main.dto.enums.RequestStatus;
 import ru.practicum.main.dto.LocationDto;
@@ -720,7 +721,7 @@ class EventServiceImplTest {
                 .build();
 
         PublicEventSearchParams params = PublicEventSearchParams.builder()
-                .sort("VIEWS")
+                .sort(EventSort.VIEWS)
                 .from(0)
                 .size(10)
                 .build();

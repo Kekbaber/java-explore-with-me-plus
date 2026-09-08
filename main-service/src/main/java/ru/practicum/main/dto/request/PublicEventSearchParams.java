@@ -1,6 +1,5 @@
 package ru.practicum.main.dto.request;
 
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
@@ -8,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.main.dto.enums.EventSort;
 
 import java.util.List;
 
@@ -29,8 +29,7 @@ public class PublicEventSearchParams {
     private Boolean onlyAvailable = false;
 
     @Builder.Default
-    @Pattern(regexp = "EVENT_DATE|VIEWS", message = "must be one of EVENT_DATE, VIEWS")
-    private String sort = "EVENT_DATE";
+    private EventSort sort = EventSort.EVENT_DATE;
 
     @PositiveOrZero
     @Builder.Default

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.dto.enums.AdminStateAction;
+import ru.practicum.main.dto.enums.EventSort;
 import ru.practicum.main.dto.enums.EventStateAction;
 import ru.practicum.main.dto.enums.RequestStatus;
 import ru.practicum.main.dto.request.*;
@@ -34,13 +35,13 @@ import ru.practicum.stat.client.StatClient;
 import ru.practicum.stat.dto.ViewStats;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,9 +62,6 @@ public class EventServiceImpl implements EventService {
     private static final String REQUEST_IDS_NOT_FOUND = "One or more request IDs were not found or do not belong to this event";
 
     private static final DateTimeFormatter STAT_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final int STATS_YEARS_RANGE = 10;
-    private static final LocalDateTime DEFAULT_START = LocalDateTime.of(2000, Month.JANUARY, 1, 0, 0);
-    private static final LocalDateTime DEFAULT_END = LocalDateTime.of(2100, Month.JANUARY, 1, 0, 0);
 
     private final EventRepository eventRepository;
     private final EventSearchRepository eventSearchRepository;
@@ -81,7 +79,7 @@ public class EventServiceImpl implements EventService {
         List<Long> eventIds = events.stream().map(Event::getId).toList();
 
         Map<Long, Long> confirmedMap = getConfirmedRequestsBatch(eventIds);
-        Map<Long, Long> viewsMap = getViewsBatch(eventIds);
+        Map<Long, Long> viewsMap = getViewsBatch(events);
 
         return events.stream()
                 .map(event -> EventMapper.toShortDto(event,
@@ -113,7 +111,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getUserEvent(Long userId, Long eventId) {
         Event event = getUserEventOrThrow(userId, eventId);
-        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(eventId));
+        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(event));
     }
 
     @Override
@@ -147,7 +145,7 @@ public class EventServiceImpl implements EventService {
 
         event = eventRepository.save(event);
 
-        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(eventId));
+        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(event));
     }
 
     @Override
@@ -224,8 +222,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventFullDto> searchEventsAdmin(AdminEventSearchParams params) {
-        LocalDateTime start = parseDateTimeOr(params.getRangeStart(), DEFAULT_START);
-        LocalDateTime end = parseDateTimeOr(params.getRangeEnd(), DEFAULT_END);
+        LocalDateTime start = parseDateTimeOr(params.getRangeStart(), null);
+        LocalDateTime end = parseDateTimeOr(params.getRangeEnd(), null);
         validateRange(start, end);
         Pageable pageable = PageRequest.of(params.getFrom() / params.getSize(), params.getSize());
 
@@ -245,7 +243,7 @@ public class EventServiceImpl implements EventService {
         List<Long> eventIds = events.stream().map(Event::getId).toList();
 
         Map<Long, Long> confirmedMap = getConfirmedRequestsBatch(eventIds);
-        Map<Long, Long> viewsMap = getViewsBatch(eventIds);
+        Map<Long, Long> viewsMap = getViewsBatch(events);
 
         return events.stream()
                 .map(event -> EventMapper.toFullDto(event,
@@ -291,14 +289,14 @@ public class EventServiceImpl implements EventService {
 
         event = eventRepository.save(event);
 
-        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(eventId));
+        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(event));
     }
 
     @Override
     public List<EventShortDto> searchPublicEvents(PublicEventSearchParams params, String ip) {
         LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
         LocalDateTime start = parseDateTimeOr(params.getRangeStart(), now);
-        LocalDateTime end = parseDateTimeOr(params.getRangeEnd(), DEFAULT_END);
+        LocalDateTime end = parseDateTimeOr(params.getRangeEnd(), null);
         validateRange(start, end);
         Pageable pageable = PageRequest.of(params.getFrom() / params.getSize(), params.getSize());
 
@@ -312,7 +310,7 @@ public class EventServiceImpl implements EventService {
         List<Long> eventIds = events.stream().map(Event::getId).toList();
 
         Map<Long, Long> confirmedMap = getConfirmedRequestsBatch(eventIds);
-        Map<Long, Long> viewsMap = getViewsBatch(eventIds);
+        Map<Long, Long> viewsMap = getViewsBatch(events);
 
         List<EventShortDto> result = events.stream()
                 .map(event -> EventMapper.toShortDto(event,
@@ -320,7 +318,7 @@ public class EventServiceImpl implements EventService {
                         viewsMap.getOrDefault(event.getId(), 0L)))
                 .toList();
 
-        if ("VIEWS".equals(params.getSort())) {
+        if (EventSort.VIEWS == params.getSort()) {
             result = result.stream()
                     .sorted(Comparator.comparing(EventShortDto::getViews,
                                     Comparator.nullsLast(Comparator.naturalOrder()))
@@ -344,7 +342,7 @@ public class EventServiceImpl implements EventService {
 
         statClient.saveHit(ip, StatClient.EVENT_URI + "/" + eventId);
 
-        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(eventId));
+        return EventMapper.toFullDto(event, getConfirmedRequests(eventId), getViews(event));
     }
 
     private Event getUserEventOrThrow(Long userId, Long eventId) {
@@ -379,18 +377,22 @@ public class EventServiceImpl implements EventService {
                 ));
     }
 
-    private long getViews(Long eventId) {
-        return getViewsBatch(List.of(eventId)).getOrDefault(eventId, 0L);
+    private long getViews(Event event) {
+        return getViewsBatch(List.of(event)).getOrDefault(event.getId(), 0L);
     }
 
-    private Map<Long, Long> getViewsBatch(List<Long> eventIds) {
-        if (eventIds == null || eventIds.isEmpty()) {
+    private Map<Long, Long> getViewsBatch(List<Event> events) {
+        if (events == null || events.isEmpty()) {
             return Map.of();
         }
-        LocalDateTime start = LocalDateTime.now(ZoneId.systemDefault()).minusYears(STATS_YEARS_RANGE);
         LocalDateTime end = LocalDateTime.now(ZoneId.systemDefault());
-        List<String> uris = eventIds.stream()
-                .map(id -> StatClient.EVENT_URI + "/" + id)
+        LocalDateTime start = events.stream()
+                .map(e -> e.getPublishedOn() != null ? e.getPublishedOn() : e.getCreatedOn())
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo)
+                .orElse(end);
+        List<String> uris = events.stream()
+                .map(e -> StatClient.EVENT_URI + "/" + e.getId())
                 .toList();
         List<ViewStats> stats = statClient.getStats(
                 start.format(STAT_DATE_FORMATTER),
@@ -417,7 +419,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void validateRange(LocalDateTime start, LocalDateTime end) {
-        if (start.isAfter(end)) {
+        if (start != null && end != null && start.isAfter(end)) {
             throw new IllegalArgumentException("Field: rangeStart. Error: должно быть не позже rangeEnd. Value: " + start);
         }
     }
