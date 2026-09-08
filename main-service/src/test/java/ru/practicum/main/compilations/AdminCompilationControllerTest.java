@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.main.controller.AdminCompilationController;
 import ru.practicum.main.dto.request.NewCompilationDto;
-import ru.practicum.main.dto.request.UpdateCompilationRequest;
 import ru.practicum.main.dto.response.CompilationDto;
 import ru.practicum.main.dto.response.EventShortDto;
 import ru.practicum.main.service.CompilationService;
@@ -38,7 +37,6 @@ class AdminCompilationControllerTest {
 
     private NewCompilationDto newCompilationDto;
     private CompilationDto compilationDto;
-    private UpdateCompilationRequest updateRequest;
 
     @BeforeEach
     void setUp() {
@@ -61,12 +59,6 @@ class AdminCompilationControllerTest {
                 .title("Test Compilation")
                 .pinned(true)
                 .events(List.of(eventShortDto))
-                .build();
-
-        updateRequest = UpdateCompilationRequest.builder()
-                .title("Updated Compilation")
-                .pinned(false)
-                .events(List.of(1L))
                 .build();
     }
 
@@ -114,12 +106,12 @@ class AdminCompilationControllerTest {
     @Test
     void updateCompilation_ShouldReturnOk() throws Exception {
         Long compId = 1L;
-        when(compilationService.updateCompilation(eq(compId), any(UpdateCompilationRequest.class)))
+        when(compilationService.updateCompilation(eq(compId), any(NewCompilationDto.class)))
                 .thenReturn(compilationDto);
 
         mockMvc.perform(patch("/admin/compilations/{compId}", compId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
+                        .content(objectMapper.writeValueAsString(newCompilationDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.title").value("Test Compilation"));
@@ -128,7 +120,7 @@ class AdminCompilationControllerTest {
     @Test
     void updateCompilation_WithInvalidTitle_ShouldReturnBadRequest() throws Exception {
         Long compId = 1L;
-        UpdateCompilationRequest invalidRequest = UpdateCompilationRequest.builder()
+        NewCompilationDto invalidRequest = NewCompilationDto.builder()
                 .title("") // Пустой title
                 .build();
 
@@ -151,7 +143,7 @@ class AdminCompilationControllerTest {
     void updateCompilation_WithTitleTooLong_ShouldReturnBadRequest() throws Exception {
         Long compId = 1L;
         String longTitle = "a".repeat(51);
-        UpdateCompilationRequest invalidRequest = UpdateCompilationRequest.builder()
+        NewCompilationDto invalidRequest = NewCompilationDto.builder()
                 .title(longTitle)
                 .build();
 

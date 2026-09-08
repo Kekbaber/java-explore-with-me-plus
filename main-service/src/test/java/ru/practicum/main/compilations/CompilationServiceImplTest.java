@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import ru.practicum.main.dto.request.NewCompilationDto;
-import ru.practicum.main.dto.request.UpdateCompilationRequest;
 import ru.practicum.main.dto.response.CompilationDto;
 import ru.practicum.main.exception.model.NotFoundException;
 import ru.practicum.main.model.Compilation;
@@ -38,7 +37,6 @@ class CompilationServiceImplTest {
     private CompilationServiceImpl compilationService;
 
     private NewCompilationDto newCompilationDto;
-    private UpdateCompilationRequest updateRequest;
     private Compilation compilation;
     private Event event;
     private List<Event> events;
@@ -57,12 +55,6 @@ class CompilationServiceImplTest {
         newCompilationDto = NewCompilationDto.builder()
                 .title("Test Compilation")
                 .pinned(true)
-                .events(List.of(1L))
-                .build();
-
-        updateRequest = UpdateCompilationRequest.builder()
-                .title("Updated Compilation")
-                .pinned(false)
                 .events(List.of(1L))
                 .build();
 
@@ -153,7 +145,7 @@ class CompilationServiceImplTest {
         when(eventRepository.findAllById(any(List.class))).thenReturn(events);
         when(compilationRepository.save(any(Compilation.class))).thenReturn(updatedCompilation);
 
-        CompilationDto result = compilationService.updateCompilation(compId, updateRequest);
+        CompilationDto result = compilationService.updateCompilation(compId, newCompilationDto);
 
         assertThat(result).isNotNull();
         assertThat(result.getTitle()).isEqualTo("Updated Compilation");
@@ -167,7 +159,8 @@ class CompilationServiceImplTest {
     @Test
     void updateCompilation_ShouldUpdateOnlyTitle() {
         Long compId = 1L;
-        UpdateCompilationRequest requestWithOnlyTitle = UpdateCompilationRequest.builder()
+
+        NewCompilationDto requestWithOnlyTitle = NewCompilationDto.builder()
                 .title("Only Title Updated")
                 .build();
 
@@ -197,7 +190,7 @@ class CompilationServiceImplTest {
         Long compId = 999L;
         when(compilationRepository.findById(compId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> compilationService.updateCompilation(compId, updateRequest))
+        assertThatThrownBy(() -> compilationService.updateCompilation(compId, newCompilationDto))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Compilation not found with id: " + compId);
 
