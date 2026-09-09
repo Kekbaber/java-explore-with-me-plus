@@ -4,7 +4,6 @@ import ru.practicum.main.dto.request.*;
 import ru.practicum.main.dto.response.EventCommentAdminDto;
 import ru.practicum.main.dto.response.EventCommentAuthorDto;
 import ru.practicum.main.dto.response.EventCommentUserDto;
-import ru.practicum.main.model.EventComment;
 
 import java.util.List;
 
