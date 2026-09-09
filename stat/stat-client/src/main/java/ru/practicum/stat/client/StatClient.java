@@ -1,26 +1,37 @@
 package ru.practicum.stat.client;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stat.dto.EndpointHit;
 import ru.practicum.stat.dto.ViewStats;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-@Component
 public class StatClient {
 
-    private final RestClient restClient;
+    public static final String EVENT_URI = "/events";
 
-    public StatClient(@Value("${stat.server.url:http://localhost:9090}") String baseUrl) {
+    private final RestClient restClient;
+    private final String app;
+
+    public StatClient(String baseUrl, String app) {
         this.restClient = RestClient.builder().baseUrl(baseUrl).build();
+        this.app = app;
+    }
+
+    public boolean saveHit(String ip, String uri) {
+        return saveHit(EndpointHit.builder()
+                .app(app)
+                .uri(uri)
+                .ip(ip)
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 
     public boolean saveHit(EndpointHit hit) {

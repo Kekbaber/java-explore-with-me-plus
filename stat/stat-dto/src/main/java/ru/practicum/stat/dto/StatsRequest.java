@@ -1,5 +1,6 @@
 package ru.practicum.stat.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,9 @@ public class StatsRequest {
     private LocalDateTime end;
     private List<String> uris;
     private Boolean unique = false;
+
+    @AssertTrue(message = "start должен быть раньше или равен end")
+    public boolean isStartBeforeEnd() {
+        return start == null || end == null || !start.isAfter(end);
+    }
 }
