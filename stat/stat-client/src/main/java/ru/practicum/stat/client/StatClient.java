@@ -16,17 +16,18 @@ import java.util.List;
 public class StatClient {
 
     public static final String EVENT_URI = "/events";
-    private static final String APP = "ewm-main-service";
 
     private final RestClient restClient;
+    private final String app;
 
-    public StatClient(String baseUrl) {
+    public StatClient(String baseUrl, String app) {
         this.restClient = RestClient.builder().baseUrl(baseUrl).build();
+        this.app = app;
     }
 
     public boolean saveHit(String ip, String uri) {
         return saveHit(EndpointHit.builder()
-                .app(APP)
+                .app(app)
                 .uri(uri)
                 .ip(ip)
                 .timestamp(LocalDateTime.now())
