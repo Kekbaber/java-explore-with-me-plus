@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class EventCommentAdminDto {
     private Long id;
     private String content;
-    private UserDto author;
+    private String author;
     private String event;
     private EventCommentStatus status;
     private LocalDateTime created;

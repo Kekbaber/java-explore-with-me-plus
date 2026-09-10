@@ -103,7 +103,6 @@ public class EventCommentServiceImpl implements EventCommentService {
                 EventCommentStatus.APPROVED,
                 pageable
         );
-        log.info("size = " + page.getContent().size());
 
         return page.getContent().stream()
                 .map(EventCommentMapper::toEventCommentUserDto)
@@ -123,10 +122,9 @@ public class EventCommentServiceImpl implements EventCommentService {
             throw new NotFoundException(USER_NOT_FOUND_EXCEPTION + userId);
         }
 
-        return eventCommentRepository.findByEventIdAndAuthorIdAndStatus(
+        return eventCommentRepository.findByEventIdAndAuthorId(
                         eventId,
-                        userId,
-                        EventCommentStatus.APPROVED
+                        userId
                 ).stream()
                 .map(EventCommentMapper::toEventCommentAuthorDto)
                 .toList();
@@ -158,8 +156,6 @@ public class EventCommentServiceImpl implements EventCommentService {
 
     @Override
     public List<EventCommentAdminDto> getAllComments(String state, GetEventCommentParamDto param) {
-        EventCommentStatus commentStatus = EventCommentStatus.valueOf(state.toUpperCase());
-
         Integer from = param.getFrom();
         Integer size = param.getSize();
 
@@ -167,17 +163,17 @@ public class EventCommentServiceImpl implements EventCommentService {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("created").descending());
         Page<EventComment> page = null;
 
-        switch (commentStatus) {
-            case WAITING:
-            case APPROVED:
-            case REJECTED:
-                page = eventCommentRepository.findByStatus(
-                        commentStatus,
-                        pageable
-                );
-                break;
-            default:
-                page = eventCommentRepository.findAll(pageable);
+        state = state.toUpperCase();
+
+        if (state.equals("ALL")) {
+            page = eventCommentRepository.findAll(pageable);
+        } else {
+            EventCommentStatus commentStatus = EventCommentStatus.valueOf(state);
+
+            page = eventCommentRepository.findByStatus(
+                    commentStatus,
+                    pageable
+            );
         }
 
         return page.getContent().stream()

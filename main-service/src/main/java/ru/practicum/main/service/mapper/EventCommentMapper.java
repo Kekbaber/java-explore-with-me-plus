@@ -39,7 +39,7 @@ public final class EventCommentMapper {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .author(comment.getAuthor().getName())
-                .status(comment.getStatus().toString())
+                .status(comment.getStatus())
                 .created(comment.getCreated())
                 .build();
     }
@@ -48,7 +48,7 @@ public final class EventCommentMapper {
         return EventCommentAdminDto.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
-                .author(UserMapper.toDto(comment.getAuthor()))
+                .author(comment.getAuthor().getName())
                 .status(comment.getStatus())
                 .created(comment.getCreated())
                 .event(comment.getEvent().getTitle())

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.main.model.enums.EventCommentStatus;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,6 @@ public class EventCommentUserDto {
     private Long id;
     private String content;
     private String author;
-    private String status;
+    private EventCommentStatus status;
     private LocalDateTime created;
 }

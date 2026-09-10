@@ -316,7 +316,7 @@ class EventCommentServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(EventCommentStatus.APPROVED.name(), result.get(0).getStatus());
+        assertEquals(EventCommentStatus.APPROVED, result.get(0).getStatus());
         verify(eventRepository, times(1)).existsById(1L);
         verify(eventCommentRepository, times(1))
                 .findByEventIdAndStatus(eq(1L), eq(EventCommentStatus.APPROVED), any(Pageable.class));
@@ -357,7 +357,7 @@ class EventCommentServiceImplTest {
     void getCommentsEventByUser_shouldReturnApprovedComments() {
         when(eventRepository.existsById(1L)).thenReturn(true);
         when(userRepository.existsById(1L)).thenReturn(true);
-        when(eventCommentRepository.findByEventIdAndAuthorIdAndStatus(1L, 1L, EventCommentStatus.APPROVED))
+        when(eventCommentRepository.findByEventIdAndAuthorId(1L, 1L))
                 .thenReturn(List.of(approvedComment));
 
         List<EventCommentAuthorDto> result = service.getCommentsEventByUser(paramDto);
@@ -367,7 +367,7 @@ class EventCommentServiceImplTest {
         verify(eventRepository, times(1)).existsById(1L);
         verify(userRepository, times(1)).existsById(1L);
         verify(eventCommentRepository, times(1))
-                .findByEventIdAndAuthorIdAndStatus(1L, 1L, EventCommentStatus.APPROVED);
+                .findByEventIdAndAuthorId(1L, 1L);
     }
 
     @Test
@@ -375,7 +375,7 @@ class EventCommentServiceImplTest {
     void getCommentsEventByUser_shouldReturnEmptyList() {
         when(eventRepository.existsById(1L)).thenReturn(true);
         when(userRepository.existsById(1L)).thenReturn(true);
-        when(eventCommentRepository.findByEventIdAndAuthorIdAndStatus(1L, 1L, EventCommentStatus.APPROVED))
+        when(eventCommentRepository.findByEventIdAndAuthorId(1L, 1L))
                 .thenReturn(List.of());
 
         List<EventCommentAuthorDto> result = service.getCommentsEventByUser(paramDto);
@@ -385,7 +385,7 @@ class EventCommentServiceImplTest {
         verify(eventRepository, times(1)).existsById(1L);
         verify(userRepository, times(1)).existsById(1L);
         verify(eventCommentRepository, times(1))
-                .findByEventIdAndAuthorIdAndStatus(1L, 1L, EventCommentStatus.APPROVED);
+                .findByEventIdAndAuthorId(1L, 1L);
     }
 
     @Test
@@ -397,7 +397,7 @@ class EventCommentServiceImplTest {
         verify(eventRepository, times(1)).existsById(1L);
         verify(userRepository, never()).existsById(anyLong());
         verify(eventCommentRepository, never())
-                .findByEventIdAndAuthorIdAndStatus(anyLong(), anyLong(), any(EventCommentStatus.class));
+                .findByEventIdAndAuthorId(anyLong(), anyLong());
     }
 
     @Test
@@ -410,7 +410,7 @@ class EventCommentServiceImplTest {
         verify(eventRepository, times(1)).existsById(1L);
         verify(userRepository, times(1)).existsById(1L);
         verify(eventCommentRepository, never())
-                .findByEventIdAndAuthorIdAndStatus(anyLong(), anyLong(), any(EventCommentStatus.class));
+                .findByEventIdAndAuthorId(anyLong(), anyLong());
     }
 
     // ==================== approve ====================

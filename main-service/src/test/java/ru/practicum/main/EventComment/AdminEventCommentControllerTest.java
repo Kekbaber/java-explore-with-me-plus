@@ -48,7 +48,7 @@ class AdminEventCommentControllerTest {
         commentAdminDto = EventCommentAdminDto.builder()
                 .id(1L)
                 .content("Test comment")
-                .author(userDto)
+                .author(userDto.getName())
                 .event("Test Event")
                 .status(EventCommentStatus.WAITING)
                 .created(LocalDateTime.now())
@@ -74,7 +74,7 @@ class AdminEventCommentControllerTest {
         assertEquals("Test comment", result.getContent());
         assertEquals(EventCommentStatus.WAITING, result.getStatus());
         assertNotNull(result.getAuthor());
-        assertEquals("Test Author", result.getAuthor().getName());
+        assertEquals("Test Author", result.getAuthor());
         verify(eventCommentService, times(1)).getCommentById(commentId);
     }
 
@@ -114,7 +114,7 @@ class AdminEventCommentControllerTest {
         EventCommentAdminDto waitingComment = EventCommentAdminDto.builder()
                 .id(2L)
                 .content("Waiting comment")
-                .author(userDto)
+                .author(userDto.getName())
                 .event("Test Event")
                 .status(EventCommentStatus.WAITING)
                 .created(LocalDateTime.now())
@@ -141,7 +141,7 @@ class AdminEventCommentControllerTest {
         EventCommentAdminDto approvedComment = EventCommentAdminDto.builder()
                 .id(3L)
                 .content("Approved comment")
-                .author(userDto)
+                .author(userDto.getName())
                 .event("Test Event")
                 .status(EventCommentStatus.APPROVED)
                 .created(LocalDateTime.now())
@@ -194,7 +194,7 @@ class AdminEventCommentControllerTest {
         EventCommentAdminDto approvedComment = EventCommentAdminDto.builder()
                 .id(commentId)
                 .content("Test comment")
-                .author(userDto)
+                .author(userDto.getName())
                 .event("Test Event")
                 .status(EventCommentStatus.APPROVED)
                 .created(LocalDateTime.now())
@@ -209,7 +209,7 @@ class AdminEventCommentControllerTest {
         assertEquals(commentId, result.getId());
         assertEquals(EventCommentStatus.APPROVED, result.getStatus());
         assertNotNull(result.getAuthor());
-        assertEquals("Test Author", result.getAuthor().getName());
+        assertEquals("Test Author", result.getAuthor());
         verify(eventCommentService, times(1)).approve(commentId);
     }
 
@@ -247,7 +247,7 @@ class AdminEventCommentControllerTest {
         EventCommentAdminDto rejectedComment = EventCommentAdminDto.builder()
                 .id(commentId)
                 .content("Test comment 2")
-                .author(userDto)
+                .author(userDto.getName())
                 .event("Test Event")
                 .status(EventCommentStatus.REJECTED)
                 .created(LocalDateTime.now())
