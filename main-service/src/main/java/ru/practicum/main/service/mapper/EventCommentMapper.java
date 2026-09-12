@@ -17,12 +17,6 @@ public final class EventCommentMapper {
                 .build();
     }
 
-    public static EventComment toEventComment(UpdateEventCommentDto updateComment) {
-        return EventComment.builder()
-                .content(updateComment.getContent())
-                .build();
-    }
-
     public static EventCommentAuthorDto toEventCommentAuthorDto(EventComment comment) {
         return EventCommentAuthorDto.builder()
                 .id(comment.getId())
