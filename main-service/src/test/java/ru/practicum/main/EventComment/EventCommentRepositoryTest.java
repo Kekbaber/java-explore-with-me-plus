@@ -14,11 +14,12 @@ import ru.practicum.main.model.enums.EventCommentStatus;
 import ru.practicum.main.model.enums.EventState;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-class EventCommentRepository {
+class EventCommentRepositoryTest {
 
     @Autowired
     private ru.practicum.main.repository.EventCommentRepository eventCommentRepository;
@@ -30,6 +31,7 @@ class EventCommentRepository {
     private Category category;
     private Location location;
     private Event event;
+    private Long approvedCommentId;
 
     @BeforeEach
     void setUp() {
@@ -94,6 +96,8 @@ class EventCommentRepository {
         entityManager.persist(commentRejected);
 
         entityManager.flush();
+
+        approvedCommentId = commentApproved.getId();
     }
 
     @Test
@@ -227,5 +231,31 @@ class EventCommentRepository {
         assertNotNull(page);
         assertEquals(2, page.getContent().size());
         assertEquals(3, page.getTotalElements());
+    }
+
+    @Test
+    @DisplayName("findById - загружает author и event одним запросом (после detach нет LazyInitializationException)")
+    void findById_shouldEagerlyFetchAuthorAndEvent() {
+        EventComment loaded = eventCommentRepository.findById(approvedCommentId).orElseThrow();
+
+        entityManager.clear();
+
+        assertNotNull(loaded.getAuthor().getName());
+        assertNotNull(loaded.getEvent().getTitle());
+    }
+
+    @Test
+    @DisplayName("findByEventIdAndAuthorId - загружает author и event одним запросом")
+    void findByEventIdAndAuthorId_shouldEagerlyFetchAuthorAndEvent() {
+        List<EventComment> comments = eventCommentRepository.findByEventIdAndAuthorId(event.getId(), user.getId());
+
+        assertEquals(3, comments.size());
+
+        entityManager.clear();
+
+        comments.forEach(c -> {
+            assertNotNull(c.getAuthor().getName());
+            assertNotNull(c.getEvent().getTitle());
+        });
     }
 }
