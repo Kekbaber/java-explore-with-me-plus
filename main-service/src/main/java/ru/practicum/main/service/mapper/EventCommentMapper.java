@@ -3,7 +3,6 @@ package ru.practicum.main.service.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.main.dto.request.NewEventCommentDto;
-import ru.practicum.main.dto.request.UpdateEventCommentDto;
 import ru.practicum.main.dto.response.EventCommentAdminDto;
 import ru.practicum.main.dto.response.EventCommentAuthorDto;
 import ru.practicum.main.dto.response.EventCommentUserDto;
