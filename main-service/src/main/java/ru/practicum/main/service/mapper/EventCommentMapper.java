@@ -48,7 +48,7 @@ public final class EventCommentMapper {
         return EventCommentAdminDto.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
-                .author(comment.getAuthor().getName())
+                .author(UserMapper.toDto(comment.getAuthor()))
                 .status(comment.getStatus())
                 .created(comment.getCreated())
                 .event(comment.getEvent().getTitle())

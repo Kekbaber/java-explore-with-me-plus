@@ -432,6 +432,7 @@ class EventCommentServiceImplTest {
 
         assertNotNull(result);
         assertEquals(EventCommentStatus.APPROVED, result.getStatus());
+        assertEquals(user.getId(), result.getAuthor().getId());
         verify(eventCommentRepository, times(1)).findById(1L);
         verify(eventCommentRepository, times(1)).save(any(EventComment.class));
     }
