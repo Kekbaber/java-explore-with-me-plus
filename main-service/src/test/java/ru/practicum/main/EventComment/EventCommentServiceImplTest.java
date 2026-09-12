@@ -185,8 +185,10 @@ class EventCommentServiceImplTest {
     // ==================== updateComment ====================
 
     @Test
-    @DisplayName("updateComment - должен успешно обновить комментарий")
+    @DisplayName("updateComment - должен успешно обновить комментарий и сбросить статус в WAITING")
     void updateComment_shouldUpdateComment() {
+        comment.setStatus(EventCommentStatus.APPROVED);
+
         when(eventCommentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(eventRepository.existsById(1L)).thenReturn(true);
         when(userRepository.existsById(1L)).thenReturn(true);
@@ -197,6 +199,7 @@ class EventCommentServiceImplTest {
         assertNotNull(result);
         assertEquals(comment.getId(), result.getId());
         assertEquals("Updated comment", result.getContent());
+        assertEquals(EventCommentStatus.WAITING, result.getStatus());
         verify(eventCommentRepository, times(1)).findById(1L);
         verify(eventRepository, times(1)).existsById(1L);
         verify(userRepository, times(1)).existsById(1L);

@@ -71,6 +71,7 @@ public class EventCommentServiceImpl implements EventCommentService {
         EventComment oldComment = validateComment(param.getEventId(), param.getUserId(), param.getCommentId());
 
         oldComment.setContent(request.getContent());
+        oldComment.setStatus(EventCommentStatus.WAITING);
 
         oldComment = eventCommentRepository.save(oldComment);
 
