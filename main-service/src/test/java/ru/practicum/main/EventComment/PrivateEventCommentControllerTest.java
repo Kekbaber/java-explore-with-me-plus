@@ -73,7 +73,6 @@ class PrivateEventCommentControllerTest {
                 .id(commentId)
                 .content("Test comment")
                 .author("Test Author")
-                .status(EventCommentStatus.APPROVED)
                 .created(LocalDateTime.now())
                 .build();
 
@@ -222,7 +221,7 @@ class PrivateEventCommentControllerTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(EventCommentStatus.APPROVED, result.get(0).getStatus());
+        assertEquals(commentUserDto.getContent(), result.get(0).getContent());
         verify(eventCommentService, times(1)).getCommentsByEvent(anyLong(), any(GetEventCommentParamDto.class));
     }
 

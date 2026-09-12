@@ -319,7 +319,7 @@ class EventCommentServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(EventCommentStatus.APPROVED, result.getFirst().getStatus());
+        assertEquals(approvedComment.getContent(), result.getFirst().getContent());
         verify(eventRepository, times(1)).existsById(1L);
         verify(eventCommentRepository, times(1))
                 .findByEventIdAndStatus(eq(1L), eq(EventCommentStatus.APPROVED), any(Pageable.class));

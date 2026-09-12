@@ -39,7 +39,6 @@ public final class EventCommentMapper {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .author(comment.getAuthor().getName())
-                .status(comment.getStatus())
                 .created(comment.getCreated())
                 .build();
     }
