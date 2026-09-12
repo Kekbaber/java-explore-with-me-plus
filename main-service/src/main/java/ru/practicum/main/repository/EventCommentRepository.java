@@ -20,7 +20,11 @@ public interface EventCommentRepository extends JpaRepository<EventComment, Long
     Page<EventComment> findByStatus(EventCommentStatus status, Pageable pageable);
 
     @EntityGraph(attributePaths = {"author", "event"})
-    List<EventComment> findByEventIdAndAuthorId(Long eventId, Long userId);
+    List<EventComment> findByEventIdAndAuthorIdAndStatusOrderByCreatedDesc(
+            Long eventId,
+            Long userId,
+            EventCommentStatus status
+    );
 
     @Override
     @EntityGraph(attributePaths = {"author", "event"})

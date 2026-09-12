@@ -113,7 +113,7 @@ class EventCommentRepositoryTest {
 
         assertNotNull(page);
         assertEquals(1, page.getContent().size());
-        assertEquals(EventCommentStatus.WAITING, page.getContent().get(0).getStatus());
+        assertEquals(EventCommentStatus.WAITING, page.getContent().getFirst().getStatus());
     }
 
     @Test
@@ -129,7 +129,7 @@ class EventCommentRepositoryTest {
 
         assertNotNull(page);
         assertEquals(1, page.getContent().size());
-        assertEquals(EventCommentStatus.APPROVED, page.getContent().get(0).getStatus());
+        assertEquals(EventCommentStatus.APPROVED, page.getContent().getFirst().getStatus());
     }
 
     @Test
@@ -245,11 +245,18 @@ class EventCommentRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByEventIdAndAuthorId - загружает author и event одним запросом")
-    void findByEventIdAndAuthorId_shouldEagerlyFetchAuthorAndEvent() {
-        List<EventComment> comments = eventCommentRepository.findByEventIdAndAuthorId(event.getId(), user.getId());
+    @DisplayName("findByEventIdAndAuthorIdAndStatusOrderByCreatedDesc - фильтрует по APPROVED и загружает author/event")
+    void findByEventIdAndAuthorIdAndStatus_shouldFilterApprovedAndFetchAssociations() {
+        List<EventComment> comments = eventCommentRepository
+                .findByEventIdAndAuthorIdAndStatusOrderByCreatedDesc(
+                        event.getId(),
+                        user.getId(),
+                        EventCommentStatus.APPROVED
+                );
 
-        assertEquals(3, comments.size());
+        assertEquals(1, comments.size());
+        assertEquals("Approved comment", comments.getFirst().getContent());
+        assertEquals(EventCommentStatus.APPROVED, comments.getFirst().getStatus());
 
         entityManager.clear();
 
@@ -257,5 +264,36 @@ class EventCommentRepositoryTest {
             assertNotNull(c.getAuthor().getName());
             assertNotNull(c.getEvent().getTitle());
         });
+    }
+
+    @Test
+    @DisplayName("findByEventIdAndAuthorIdAndStatusOrderByCreatedDesc - не возвращает комментарии другого автора")
+    void findByEventIdAndAuthorIdAndStatus_shouldNotReturnOtherAuthorComments() {
+        User anotherUser = User.builder()
+                .name("Another User")
+                .email("another@example.com")
+                .build();
+        entityManager.persist(anotherUser);
+
+        EventComment otherApproved = EventComment.builder()
+                .content("Other author approved")
+                .author(anotherUser)
+                .event(event)
+                .status(EventCommentStatus.APPROVED)
+                .created(LocalDateTime.now())
+                .build();
+        entityManager.persist(otherApproved);
+        entityManager.flush();
+
+        List<EventComment> comments = eventCommentRepository
+                .findByEventIdAndAuthorIdAndStatusOrderByCreatedDesc(
+                        event.getId(),
+                        user.getId(),
+                        EventCommentStatus.APPROVED
+                );
+
+        assertEquals(1, comments.size());
+        assertEquals("Approved comment", comments.getFirst().getContent());
+        assertEquals(user.getId(), comments.getFirst().getAuthor().getId());
     }
 }

@@ -122,10 +122,12 @@ public class EventCommentServiceImpl implements EventCommentService {
             throw new NotFoundException(USER_NOT_FOUND_EXCEPTION + userId);
         }
 
-        return eventCommentRepository.findByEventIdAndAuthorId(
+        return eventCommentRepository.findByEventIdAndAuthorIdAndStatusOrderByCreatedDesc(
                         eventId,
-                        userId
-                ).stream()
+                        userId,
+                        EventCommentStatus.APPROVED
+                )
+                .stream()
                 .map(EventCommentMapper::toEventCommentAuthorDto)
                 .toList();
     }
