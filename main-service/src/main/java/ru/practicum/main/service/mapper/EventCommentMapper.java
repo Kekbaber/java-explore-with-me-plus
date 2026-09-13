@@ -2,7 +2,7 @@ package ru.practicum.main.service.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.main.dto.request.NewEventCommentDto;
+import ru.practicum.main.dto.request.EventCommentDto;
 import ru.practicum.main.dto.response.EventCommentAdminDto;
 import ru.practicum.main.dto.response.EventCommentAuthorDto;
 import ru.practicum.main.dto.response.EventCommentUserDto;
@@ -10,7 +10,7 @@ import ru.practicum.main.model.EventComment;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EventCommentMapper {
-    public static EventComment toEventComment(NewEventCommentDto newComment) {
+    public static EventComment toEventComment(EventCommentDto newComment) {
         return EventComment.builder()
                 .content(newComment.getContent())
                 .build();

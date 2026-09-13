@@ -43,7 +43,7 @@ public class EventCommentServiceImpl implements EventCommentService {
 
     @Override
     @Transactional
-    public EventCommentAuthorDto addComment(NewEventCommentDto newComment, NewEventCommentParamDto param) {
+    public EventCommentAuthorDto addComment(EventCommentDto newComment, NewEventCommentParamDto param) {
         EventComment comment = EventCommentMapper.toEventComment(newComment);
 
         // Проверка на существование события
@@ -67,7 +67,7 @@ public class EventCommentServiceImpl implements EventCommentService {
 
     @Override
     @Transactional
-    public EventCommentAuthorDto updateComment(UpdateEventCommentDto request, EventCommentParamDto param) {
+    public EventCommentAuthorDto updateComment(EventCommentDto request, EventCommentParamDto param) {
         EventComment oldComment = validateComment(param.getEventId(), param.getUserId(), param.getCommentId());
 
         oldComment.setContent(request.getContent());
@@ -158,7 +158,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     }
 
     @Override
-    public List<EventCommentAdminDto> getAllComments(String state, GetEventCommentParamDto param) {
+    public List<EventCommentAdminDto> getAllComments(EventCommentRequestStatus state, GetEventCommentParamDto param) {
         Integer from = param.getFrom();
         Integer size = param.getSize();
 
@@ -166,12 +166,10 @@ public class EventCommentServiceImpl implements EventCommentService {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("created").descending());
         Page<EventComment> page = null;
 
-        state = state.toUpperCase();
-
-        if (state.equals("ALL")) {
+        if (state.isAggregate()) {
             page = eventCommentRepository.findAll(pageable);
         } else {
-            EventCommentStatus commentStatus = EventCommentStatus.valueOf(state);
+            EventCommentStatus commentStatus = EventCommentStatus.valueOf(state.toString());
 
             page = eventCommentRepository.findByStatus(
                     commentStatus,
@@ -217,6 +215,16 @@ public class EventCommentServiceImpl implements EventCommentService {
     private EventComment setStatus(Long commentId, EventCommentStatus status) {
         EventComment comment = eventCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND_EXCEPTION + commentId));
+
+        if (comment.getStatus() != EventCommentStatus.WAITING) {
+            throw new ConflictException(
+                    String.format(
+                            "Cannot change status to %s. Comment with id=%d has status %s. " +
+                                    "Only WAITING comments can be moderated",
+                            status, commentId, comment.getStatus()
+                    )
+            );
+        }
 
         comment.setStatus(status);
 

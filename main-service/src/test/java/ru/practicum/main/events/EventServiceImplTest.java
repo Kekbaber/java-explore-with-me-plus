@@ -59,6 +59,9 @@ class EventServiceImplTest {
     @Mock
     private StatClient statClient;
 
+    @Mock
+    private EventCommentRepository eventCommentRepository;
+
     @InjectMocks
     private EventServiceImpl eventService;
 
@@ -229,6 +232,8 @@ class EventServiceImplTest {
                 .thenReturn(List.<Object[]>of(new Object[]{1L, 0L}));
         when(statClient.getStats(anyString(), anyString(), anyList(), eq(true)))
                 .thenReturn(List.of());
+        when(eventCommentRepository.countByEventIds(anyList()))
+                .thenReturn(List.<Object[]>of(new Object[]{1L, 0L}));
 
         List<EventShortDto> result = eventService.getUserEvents(1L, 0, 10);
 

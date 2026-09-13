@@ -35,8 +35,8 @@ class PrivateEventCommentControllerTest {
     @InjectMocks
     private PrivateEventCommentController controller;
 
-    private NewEventCommentDto newCommentDto;
-    private UpdateEventCommentDto updateCommentDto;
+    private EventCommentDto newCommentDto;
+    private EventCommentDto updateCommentDto;
     private EventCommentAuthorDto commentAuthorDto;
     private EventCommentUserDto commentUserDto;
     private List<EventCommentAuthorDto> commentAuthorList;
@@ -51,11 +51,11 @@ class PrivateEventCommentControllerTest {
         userId = 1L;
         commentId = 1L;
 
-        newCommentDto = NewEventCommentDto.builder()
+        newCommentDto = EventCommentDto.builder()
                 .content("Test comment")
                 .build();
 
-        updateCommentDto = UpdateEventCommentDto.builder()
+        updateCommentDto = EventCommentDto.builder()
                 .content("Updated comment")
                 .build();
 
@@ -85,7 +85,7 @@ class PrivateEventCommentControllerTest {
     @Test
     @DisplayName("POST /events/{eventId}/comments - должен успешно создать комментарий")
     void addComment_shouldCreateComment() {
-        when(eventCommentService.addComment(any(NewEventCommentDto.class), any(NewEventCommentParamDto.class)))
+        when(eventCommentService.addComment(any(EventCommentDto.class), any(NewEventCommentParamDto.class)))
                 .thenReturn(commentAuthorDto);
 
         EventCommentAuthorDto result = controller.addComment(newCommentDto, eventId, userId);
@@ -94,7 +94,7 @@ class PrivateEventCommentControllerTest {
         assertEquals(commentAuthorDto.getId(), result.getId());
         assertEquals(commentAuthorDto.getContent(), result.getContent());
         assertEquals(commentAuthorDto.getStatus(), result.getStatus());
-        verify(eventCommentService, times(1)).addComment(any(NewEventCommentDto.class), any(NewEventCommentParamDto.class));
+        verify(eventCommentService, times(1)).addComment(any(EventCommentDto.class), any(NewEventCommentParamDto.class));
     }
 
     @Test
@@ -116,14 +116,14 @@ class PrivateEventCommentControllerTest {
     @Test
     @DisplayName("PATCH /events/{eventId}/comments/{commentId} - должен успешно обновить комментарий")
     void updateComment_shouldUpdateComment() {
-        when(eventCommentService.updateComment(any(UpdateEventCommentDto.class), any(EventCommentParamDto.class)))
+        when(eventCommentService.updateComment(any(EventCommentDto.class), any(EventCommentParamDto.class)))
                 .thenReturn(commentAuthorDto);
 
         EventCommentAuthorDto result = controller.updateComment(updateCommentDto, eventId, commentId, userId);
 
         assertNotNull(result);
         assertEquals(commentAuthorDto.getId(), result.getId());
-        verify(eventCommentService, times(1)).updateComment(any(UpdateEventCommentDto.class), any(EventCommentParamDto.class));
+        verify(eventCommentService, times(1)).updateComment(any(EventCommentDto.class), any(EventCommentParamDto.class));
     }
 
     @Test
@@ -261,7 +261,7 @@ class PrivateEventCommentControllerTest {
     @DisplayName("Проверка наличия @PostMapping на методе addComment")
     void addComment_shouldHavePostMapping() throws NoSuchMethodException {
         Method method = PrivateEventCommentController.class
-                .getMethod("addComment", NewEventCommentDto.class, Long.class, Long.class);
+                .getMethod("addComment", EventCommentDto.class, Long.class, Long.class);
         PostMapping annotation = method.getAnnotation(PostMapping.class);
         assertNotNull(annotation, "Метод должен иметь аннотацию @PostMapping");
     }
@@ -270,7 +270,7 @@ class PrivateEventCommentControllerTest {
     @DisplayName("Проверка наличия @ResponseStatus(CREATED) на методе addComment")
     void addComment_shouldHaveResponseStatusCreated() throws NoSuchMethodException {
         Method method = PrivateEventCommentController.class
-                .getMethod("addComment", NewEventCommentDto.class, Long.class, Long.class);
+                .getMethod("addComment", EventCommentDto.class, Long.class, Long.class);
         ResponseStatus annotation = method.getAnnotation(ResponseStatus.class);
         assertNotNull(annotation);
         assertEquals(HttpStatus.CREATED, annotation.value());
@@ -280,19 +280,9 @@ class PrivateEventCommentControllerTest {
     @DisplayName("Проверка наличия @PatchMapping на методе updateComment")
     void updateComment_shouldHavePatchMapping() throws NoSuchMethodException {
         Method method = PrivateEventCommentController.class
-                .getMethod("updateComment", UpdateEventCommentDto.class, Long.class, Long.class, Long.class);
+                .getMethod("updateComment", EventCommentDto.class, Long.class, Long.class, Long.class);
         PatchMapping annotation = method.getAnnotation(PatchMapping.class);
         assertNotNull(annotation, "Метод должен иметь аннотацию @PatchMapping");
-    }
-
-    @Test
-    @DisplayName("Проверка наличия @ResponseStatus(OK) на методе updateComment")
-    void updateComment_shouldHaveResponseStatusOk() throws NoSuchMethodException {
-        Method method = PrivateEventCommentController.class
-                .getMethod("updateComment", UpdateEventCommentDto.class, Long.class, Long.class, Long.class);
-        ResponseStatus annotation = method.getAnnotation(ResponseStatus.class);
-        assertNotNull(annotation);
-        assertEquals(HttpStatus.OK, annotation.value());
     }
 
     @Test
@@ -324,16 +314,6 @@ class PrivateEventCommentControllerTest {
     }
 
     @Test
-    @DisplayName("Проверка наличия @ResponseStatus(OK) на методе getCommentsEventByUser")
-    void getCommentsEventByUser_shouldHaveResponseStatusOk() throws NoSuchMethodException {
-        Method method = PrivateEventCommentController.class
-                .getMethod("getCommentsEventByUser", Long.class, Long.class);
-        ResponseStatus annotation = method.getAnnotation(ResponseStatus.class);
-        assertNotNull(annotation);
-        assertEquals(HttpStatus.OK, annotation.value());
-    }
-
-    @Test
     @DisplayName("Проверка наличия @GetMapping на методе getCommentsEventApproved")
     void getCommentsEventApproved_shouldHaveGetMapping() throws NoSuchMethodException {
         Method method = PrivateEventCommentController.class
@@ -341,16 +321,6 @@ class PrivateEventCommentControllerTest {
         GetMapping annotation = method.getAnnotation(GetMapping.class);
         assertNotNull(annotation, "Метод должен иметь аннотацию @GetMapping");
         assertEquals("/approved", annotation.value()[0]);
-    }
-
-    @Test
-    @DisplayName("Проверка наличия @ResponseStatus(OK) на методе getCommentsEventApproved")
-    void getCommentsEventApproved_shouldHaveResponseStatusOk() throws NoSuchMethodException {
-        Method method = PrivateEventCommentController.class
-                .getMethod("getCommentsEventApproved", Long.class, Integer.class, Integer.class);
-        ResponseStatus annotation = method.getAnnotation(ResponseStatus.class);
-        assertNotNull(annotation);
-        assertEquals(HttpStatus.OK, annotation.value());
     }
 
     @Test

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.main.dto.request.EventCommentRequestStatus;
 import ru.practicum.main.dto.request.GetEventCommentParamDto;
 import ru.practicum.main.dto.response.EventCommentAdminDto;
 import ru.practicum.main.service.EventCommentService;
@@ -21,14 +22,12 @@ public class AdminEventCommentController {
     private final EventCommentService eventCommentService;
 
     @GetMapping("/{commentId}")
-    @ResponseStatus(HttpStatus.OK)
     public EventCommentAdminDto getCommentById(@PathVariable @Positive Long commentId) {
         return eventCommentService.getCommentById(commentId);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<EventCommentAdminDto> getComments(@RequestParam(defaultValue = "ALL") @NotBlank String state,
+    public List<EventCommentAdminDto> getComments(@RequestParam(defaultValue = "ALL") EventCommentRequestStatus state,
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                                   @RequestParam(defaultValue = "10") @Positive Integer size
     ) {
@@ -41,13 +40,11 @@ public class AdminEventCommentController {
     }
 
     @PatchMapping("/{commentId}/approve")
-    @ResponseStatus(HttpStatus.OK)
     public EventCommentAdminDto approve(@PathVariable @Positive Long commentId) {
         return eventCommentService.approve(commentId);
     }
 
     @PatchMapping("/{commentId}/reject")
-    @ResponseStatus(HttpStatus.OK)
     public EventCommentAdminDto reject(@PathVariable @Positive Long commentId) {
         return eventCommentService.reject(commentId);
     }

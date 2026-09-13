@@ -57,9 +57,9 @@ class EventCommentServiceImplTest {
     private EventComment comment;
     private EventComment approvedComment;
     private EventComment rejectedComment;
-    private NewEventCommentDto newCommentDto;
+    private EventCommentDto newCommentDto;
     private NewEventCommentParamDto newCommentParam;
-    private UpdateEventCommentDto updateDto;
+    private EventCommentDto updateDto;
     private EventCommentParamDto paramDto;
     private GetEventCommentParamDto getParamDto;
 
@@ -114,7 +114,7 @@ class EventCommentServiceImplTest {
                 .created(LocalDateTime.now())
                 .build();
 
-        newCommentDto = NewEventCommentDto.builder()
+        newCommentDto = EventCommentDto.builder()
                 .content("New comment")
                 .build();
 
@@ -123,7 +123,7 @@ class EventCommentServiceImplTest {
                 .userId(1L)
                 .build();
 
-        updateDto = UpdateEventCommentDto.builder()
+        updateDto = EventCommentDto.builder()
                 .content("Updated comment")
                 .build();
 
@@ -502,7 +502,7 @@ class EventCommentServiceImplTest {
     @Test
     @DisplayName("getAllComments - должен вернуть все комментарии при статусе ALL")
     void getAllComments_shouldReturnAllComments_whenStatusIsAll() {
-        String state = "ALL";
+        EventCommentRequestStatus state = EventCommentRequestStatus.ALL;
         Page<EventComment> page = new PageImpl<>(List.of(comment, approvedComment, rejectedComment));
         when(eventCommentRepository.findAll(any(Pageable.class))).thenReturn(page);
 
@@ -517,7 +517,7 @@ class EventCommentServiceImplTest {
     @Test
     @DisplayName("getAllComments - должен вернуть комментарии со статусом WAITING")
     void getAllComments_shouldReturnWaitingComments() {
-        String state = "WAITING";
+        EventCommentRequestStatus state = EventCommentRequestStatus.WAITING;
         Page<EventComment> page = new PageImpl<>(List.of(comment));
         when(eventCommentRepository.findByStatus(eq(EventCommentStatus.WAITING), any(Pageable.class)))
                 .thenReturn(page);
@@ -534,7 +534,7 @@ class EventCommentServiceImplTest {
     @Test
     @DisplayName("getAllComments - должен вернуть комментарии со статусом APPROVED")
     void getAllComments_shouldReturnApprovedComments() {
-        String state = "APPROVED";
+        EventCommentRequestStatus state = EventCommentRequestStatus.APPROVED;
         Page<EventComment> page = new PageImpl<>(List.of(approvedComment));
         when(eventCommentRepository.findByStatus(eq(EventCommentStatus.APPROVED), any(Pageable.class)))
                 .thenReturn(page);
@@ -551,7 +551,7 @@ class EventCommentServiceImplTest {
     @Test
     @DisplayName("getAllComments - должен вернуть комментарии со статусом REJECTED")
     void getAllComments_shouldReturnRejectedComments() {
-        String state = "REJECTED";
+        EventCommentRequestStatus state = EventCommentRequestStatus.REJECTED;
         Page<EventComment> page = new PageImpl<>(List.of(rejectedComment));
         when(eventCommentRepository.findByStatus(eq(EventCommentStatus.REJECTED), any(Pageable.class)))
                 .thenReturn(page);
@@ -568,7 +568,7 @@ class EventCommentServiceImplTest {
     @Test
     @DisplayName("getAllComments - должен вернуть пустой список если комментариев нет")
     void getAllComments_shouldReturnEmptyList() {
-        String state = "ALL";
+        EventCommentRequestStatus state = EventCommentRequestStatus.ALL;
         Page<EventComment> page = new PageImpl<>(List.of());
         when(eventCommentRepository.findAll(any(Pageable.class))).thenReturn(page);
 
@@ -580,12 +580,64 @@ class EventCommentServiceImplTest {
     }
 
     @Test
-    @DisplayName("getAllComments - должен выбросить IllegalArgumentException при невалидном статусе")
-    void getAllComments_shouldThrowException_whenInvalidStatus() {
-        String state = "INVALID";
+    @DisplayName("approve - должен выбросить ConflictException если комментарий уже APPROVED")
+    void approve_shouldThrowConflictException_whenCommentAlreadyApproved() {
+        comment.setStatus(EventCommentStatus.APPROVED);
+        when(eventCommentRepository.findById(1L)).thenReturn(Optional.of(comment));
 
-        assertThrows(IllegalArgumentException.class, () -> service.getAllComments(state, getParamDto));
-        verify(eventCommentRepository, never()).findAll(any(Pageable.class));
-        verify(eventCommentRepository, never()).findByStatus(any(EventCommentStatus.class), any(Pageable.class));
+        ConflictException exception = assertThrows(ConflictException.class,
+                () -> service.approve(1L));
+
+        assertTrue(exception.getMessage().contains("APPROVED"));
+        assertTrue(exception.getMessage().contains("id=1"));
+        assertTrue(exception.getMessage().contains("Only WAITING comments can be moderated"));
+        verify(eventCommentRepository, times(1)).findById(1L);
+        verify(eventCommentRepository, never()).save(any(EventComment.class));
+    }
+
+    @Test
+    @DisplayName("approve - должен выбросить ConflictException если комментарий REJECTED")
+    void approve_shouldThrowConflictException_whenCommentRejected() {
+        comment.setStatus(EventCommentStatus.REJECTED);
+        when(eventCommentRepository.findById(1L)).thenReturn(Optional.of(comment));
+
+        ConflictException exception = assertThrows(ConflictException.class,
+                () -> service.approve(1L));
+
+        assertTrue(exception.getMessage().contains("REJECTED"));
+        assertTrue(exception.getMessage().contains("id=1"));
+        verify(eventCommentRepository, times(1)).findById(1L);
+        verify(eventCommentRepository, never()).save(any(EventComment.class));
+    }
+
+    @Test
+    @DisplayName("reject - должен выбросить ConflictException если комментарий уже REJECTED")
+    void reject_shouldThrowConflictException_whenCommentAlreadyRejected() {
+        comment.setStatus(EventCommentStatus.REJECTED);
+        when(eventCommentRepository.findById(1L)).thenReturn(Optional.of(comment));
+
+        ConflictException exception = assertThrows(ConflictException.class,
+                () -> service.reject(1L));
+
+        assertTrue(exception.getMessage().contains("REJECTED"));
+        assertTrue(exception.getMessage().contains("id=1"));
+        assertTrue(exception.getMessage().contains("Only WAITING comments can be moderated"));
+        verify(eventCommentRepository, times(1)).findById(1L);
+        verify(eventCommentRepository, never()).save(any(EventComment.class));
+    }
+
+    @Test
+    @DisplayName("reject - должен выбросить ConflictException если комментарий APPROVED")
+    void reject_shouldThrowConflictException_whenCommentApproved() {
+        comment.setStatus(EventCommentStatus.APPROVED);
+        when(eventCommentRepository.findById(1L)).thenReturn(Optional.of(comment));
+
+        ConflictException exception = assertThrows(ConflictException.class,
+                () -> service.reject(1L));
+
+        assertTrue(exception.getMessage().contains("APPROVED"));
+        assertTrue(exception.getMessage().contains("id=1"));
+        verify(eventCommentRepository, times(1)).findById(1L);
+        verify(eventCommentRepository, never()).save(any(EventComment.class));
     }
 }

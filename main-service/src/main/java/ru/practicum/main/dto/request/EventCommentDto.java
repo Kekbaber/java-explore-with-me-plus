@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class NewEventCommentDto {
+public class EventCommentDto {
     @NotBlank
     @Size(min = 10, max = 5000)
     private String content;

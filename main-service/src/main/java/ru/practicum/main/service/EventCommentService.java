@@ -8,9 +8,9 @@ import ru.practicum.main.dto.response.EventCommentUserDto;
 import java.util.List;
 
 public interface EventCommentService {
-    EventCommentAuthorDto addComment(NewEventCommentDto newComment, NewEventCommentParamDto param);
+    EventCommentAuthorDto addComment(EventCommentDto newComment, NewEventCommentParamDto param);
 
-    EventCommentAuthorDto updateComment(UpdateEventCommentDto updateComment, EventCommentParamDto param);
+    EventCommentAuthorDto updateComment(EventCommentDto updateComment, EventCommentParamDto param);
 
     void deleteComment(EventCommentParamDto param);
 
@@ -24,5 +24,5 @@ public interface EventCommentService {
 
     EventCommentAdminDto getCommentById(Long commentId);
 
-    List<EventCommentAdminDto> getAllComments(String state, GetEventCommentParamDto param);
+    List<EventCommentAdminDto> getAllComments(EventCommentRequestStatus state, GetEventCommentParamDto param);
 }

@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.main.controller.AdminEventCommentController;
+import ru.practicum.main.dto.request.EventCommentRequestStatus;
 import ru.practicum.main.dto.request.GetEventCommentParamDto;
 import ru.practicum.main.dto.response.EventCommentAdminDto;
 import ru.practicum.main.dto.response.UserDto;
@@ -95,21 +96,21 @@ class AdminEventCommentControllerTest {
     @Test
     @DisplayName("GET /admin/comments - должен вернуть список всех комментариев с параметрами по умолчанию")
     void getComments_shouldReturnCommentsListWithDefaultParams() {
-        when(eventCommentService.getAllComments(eq("ALL"), any(GetEventCommentParamDto.class)))
+        when(eventCommentService.getAllComments(eq(EventCommentRequestStatus.ALL), any(GetEventCommentParamDto.class)))
                 .thenReturn(commentList);
 
-        List<EventCommentAdminDto> result = controller.getComments("ALL", 0, 10);
+        List<EventCommentAdminDto> result = controller.getComments(EventCommentRequestStatus.ALL, 0, 10);
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(commentList, result);
-        verify(eventCommentService, times(1)).getAllComments(eq("ALL"), any(GetEventCommentParamDto.class));
+        verify(eventCommentService, times(1)).getAllComments(eq(EventCommentRequestStatus.ALL), any(GetEventCommentParamDto.class));
     }
 
     @Test
     @DisplayName("GET /admin/comments - должен вернуть список с фильтром по статусу WAITING")
     void getComments_shouldReturnCommentsListWithWaitingStatus() {
-        String state = "WAITING";
+        EventCommentRequestStatus state = EventCommentRequestStatus.WAITING;
 
         EventCommentAdminDto waitingComment = EventCommentAdminDto.builder()
                 .id(2L)
@@ -136,7 +137,8 @@ class AdminEventCommentControllerTest {
     @Test
     @DisplayName("GET /admin/comments - должен вернуть список с фильтром по статусу APPROVED")
     void getComments_shouldReturnCommentsListWithApprovedStatus() {
-        String state = "APPROVED";
+        EventCommentRequestStatus state = EventCommentRequestStatus.APPROVED;
+
 
         EventCommentAdminDto approvedComment = EventCommentAdminDto.builder()
                 .id(3L)
@@ -163,14 +165,14 @@ class AdminEventCommentControllerTest {
     @Test
     @DisplayName("GET /admin/comments - должен вернуть пустой список если комментариев нет")
     void getComments_shouldReturnEmptyList() {
-        when(eventCommentService.getAllComments(eq("ALL"), any(GetEventCommentParamDto.class)))
+        when(eventCommentService.getAllComments(eq(EventCommentRequestStatus.ALL), any(GetEventCommentParamDto.class)))
                 .thenReturn(List.of());
 
-        List<EventCommentAdminDto> result = controller.getComments("ALL", 0, 10);
+        List<EventCommentAdminDto> result = controller.getComments(EventCommentRequestStatus.ALL, 0, 10);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(eventCommentService, times(1)).getAllComments(eq("ALL"), any(GetEventCommentParamDto.class));
+        verify(eventCommentService, times(1)).getAllComments(eq(EventCommentRequestStatus.ALL), any(GetEventCommentParamDto.class));
     }
 
     @Test
@@ -179,9 +181,9 @@ class AdminEventCommentControllerTest {
         int from = 5;
         int size = 20;
 
-        controller.getComments("ALL", from, size);
+        controller.getComments(EventCommentRequestStatus.ALL, from, size);
 
-        verify(eventCommentService, times(1)).getAllComments(eq("ALL"), any(GetEventCommentParamDto.class));
+        verify(eventCommentService, times(1)).getAllComments(eq(EventCommentRequestStatus.ALL), any(GetEventCommentParamDto.class));
     }
 
     // ==================== PATCH /admin/comments/{commentId}/approve ====================

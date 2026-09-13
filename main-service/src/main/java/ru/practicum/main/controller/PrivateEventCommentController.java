@@ -25,7 +25,7 @@ public class PrivateEventCommentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EventCommentAuthorDto addComment(@RequestBody @Valid NewEventCommentDto newComment,
+    public EventCommentAuthorDto addComment(@RequestBody @Valid EventCommentDto newComment,
                                             @PathVariable @Positive Long eventId,
                                             @RequestHeader("X-Explore-With-Me-User-Id") Long userId
     ) {
@@ -37,8 +37,7 @@ public class PrivateEventCommentController {
     }
 
     @PatchMapping("/{commentId}")
-    @ResponseStatus(HttpStatus.OK)
-    public EventCommentAuthorDto updateComment(@RequestBody @Valid UpdateEventCommentDto updateComment,
+    public EventCommentAuthorDto updateComment(@RequestBody @Valid EventCommentDto updateComment,
                                                @PathVariable @Positive Long eventId,
                                                @PathVariable @Positive Long commentId,
                                                @RequestHeader("X-Explore-With-Me-User-Id") @Positive Long userId
@@ -69,7 +68,6 @@ public class PrivateEventCommentController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<EventCommentAuthorDto> getCommentsEventByUser(
             @PathVariable @Positive Long eventId,
             @RequestHeader("X-Explore-With-Me-User-Id") @Positive Long userId
@@ -83,7 +81,6 @@ public class PrivateEventCommentController {
     }
 
     @GetMapping("/approved")
-    @ResponseStatus(HttpStatus.OK)
     public List<EventCommentUserDto> getCommentsEventApproved(
             @PathVariable @Positive Long eventId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
