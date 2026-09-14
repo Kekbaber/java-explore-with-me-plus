@@ -1,0 +1,706 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Explore With Me API - Комментарии",
+    "description": "API для работы с комментариями к событиям (пользовательская и админская части)",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Private: Комментарии",
+      "description": "Закрытый API для работы с комментариями (пользователи)"
+    },
+    {
+      "name": "Admin: Комментарии",
+      "description": "API для модерации комментариев (администратор)"
+    }
+  ],
+  "paths": {
+    "/events/{eventId}/comments": {
+      "get": {
+        "tags": ["Private: Комментарии"],
+        "summary": "Получение комментариев пользователя по событию",
+        "description": "Возвращает все одобренные комментарии текущего пользователя к указанному событию.",
+        "operationId": "getCommentsEventByUser",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "ID события",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "X-Explore-With-Me-User-Id",
+            "in": "header",
+            "description": "ID пользователя",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Комментарии найдены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventCommentAuthorDto"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "content": "Отличное мероприятие! Очень понравилось!",
+                    "author": "Анна Смирнова",
+                    "status": "APPROVED",
+                    "created": "2026-09-05T18:30:15.123456"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "description": "Событие или пользователь не найдены"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Private: Комментарии"],
+        "summary": "Добавление нового комментария",
+        "description": "Пользователь создает комментарий к событию со статусом WAITING.",
+        "operationId": "addComment",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "ID события",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "X-Explore-With-Me-User-Id",
+            "in": "header",
+            "description": "ID пользователя (автора)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Данные комментария",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewEventCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Комментарий добавлен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventCommentAuthorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "description": "Событие или пользователь не найдены"
+          }
+        }
+      }
+    },
+    "/events/{eventId}/comments/approved": {
+      "get": {
+        "tags": ["Private: Комментарии"],
+        "summary": "Получение всех одобренных комментариев события",
+        "description": "Возвращает все одобренные комментарии к событию с пагинацией.",
+        "operationId": "getCommentsEventApproved",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "ID события",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "количество элементов для пропуска",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "количество элементов в наборе",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Комментарии найдены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventCommentUserDto"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 2,
+                    "content": "Отличное мероприятие! Очень понравилась атмосфера и организация.",
+                    "author": "Анна Смирнова",
+                    "created": "2026-09-05T18:30:15.123456"
+                  },
+                  {
+                    "id": 1,
+                    "content": "Было скучновато, но в целом неплохо.",
+                    "author": "Иван Петров",
+                    "created": "2026-09-05T19:15:22.654321"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Запрос составлен некорректно"
+          },
+          "404": {
+            "description": "Событие не найдено"
+          }
+        }
+      }
+    },
+    "/events/{eventId}/comments/{commentId}": {
+      "patch": {
+        "tags": ["Private: Комментарии"],
+        "summary": "Редактирование комментария",
+        "description": "Пользователь редактирует свой комментарий. Статус комментария сбрасывается в WAITING для повторной модерации.",
+        "operationId": "updateComment",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "ID события",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID комментария",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "X-Explore-With-Me-User-Id",
+            "in": "header",
+            "description": "ID пользователя (должен быть автором)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Новые данные комментария",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEventCommentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Комментарий обновлен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventCommentAuthorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Запрос составлен некорректно"
+          },
+          "403": {
+            "description": "Доступ запрещен (не автор)"
+          },
+          "404": {
+            "description": "Комментарий не найден"
+          },
+          "409": {
+            "description": "Конфликт: комментарий не принадлежит указанному событию"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Private: Комментарии"],
+        "summary": "Удаление комментария",
+        "description": "Пользователь удаляет свой комментарий.",
+        "operationId": "deleteComment",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "description": "ID события",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID комментария",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "X-Explore-With-Me-User-Id",
+            "in": "header",
+            "description": "ID пользователя (должен быть автором)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Комментарий удален"
+          },
+          "403": {
+            "description": "Доступ запрещен (не автор)"
+          },
+          "404": {
+            "description": "Комментарий не найден"
+          },
+          "409": {
+            "description": "Конфликт: комментарий не принадлежит указанному событию"
+          }
+        }
+      }
+    },
+    "/admin/comments": {
+      "get": {
+        "tags": ["Admin: Комментарии"],
+        "summary": "Получение комментариев с фильтром по статусу",
+        "description": "Администратор получает комментарии с пагинацией. Параметр state позволяет фильтровать по статусу: ALL, WAITING, APPROVED, REJECTED.",
+        "operationId": "getComments",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Статус комментария (ALL, WAITING, APPROVED, REJECTED)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ALL", "WAITING", "APPROVED", "REJECTED"],
+              "default": "ALL"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "количество элементов для пропуска",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "количество элементов в наборе",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Комментарии найдены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventCommentAdminDto"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 10,
+                    "content": "Отличное мероприятие! Всем рекомендую!",
+                    "author": {
+                      "id": 5,
+                      "name": "Екатерина Морозова",
+                      "email": "morozova@example.com"
+                    },
+                    "event": "Летний фестиваль музыки",
+                    "status": "WAITING",
+                    "created": "2026-09-05T20:10:35.123456"
+                  },
+                  {
+                    "id": 9,
+                    "content": "Спасибо организаторам за отличный вечер!",
+                    "author": {
+                      "id": 3,
+                      "name": "Сергей Иванов",
+                      "email": "ivanov@example.com"
+                    },
+                    "event": "Выставка современного искусства",
+                    "status": "APPROVED",
+                    "created": "2026-09-05T19:45:22.654321"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Запрос составлен некорректно"
+          }
+        }
+      }
+    },
+    "/admin/comments/{commentId}/approve": {
+      "patch": {
+        "tags": ["Admin: Комментарии"],
+        "summary": "Одобрение комментария",
+        "description": "Администратор одобряет комментарий (статус → APPROVED).",
+        "operationId": "approve",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID комментария",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Комментарий одобрен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventCommentAdminDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Комментарий не найден"
+          }
+        }
+      }
+    },
+    "/admin/comments/{commentId}/reject": {
+      "patch": {
+        "tags": ["Admin: Комментарии"],
+        "summary": "Отклонение комментария",
+        "description": "Администратор отклоняет комментарий (статус → REJECTED).",
+        "operationId": "reject",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID комментария",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Комментарий отклонен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventCommentAdminDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Комментарий не найден"
+          }
+        }
+      }
+    },
+    "/admin/comments/{commentId}": {
+      "get": {
+        "tags": ["Admin: Комментарии"],
+        "summary": "Получение комментария по ID",
+        "description": "Администратор получает полную информацию о комментарии по его ID.",
+        "operationId": "getCommentById",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "description": "ID комментария",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Комментарий найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventCommentAdminDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Комментарий не найден"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NewEventCommentDto": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Содержание комментария",
+            "minLength": 10,
+            "maxLength": 5000,
+            "example": "Отличное мероприятие! Очень понравилось!"
+          }
+        }
+      },
+      "UpdateEventCommentDto": {
+        "type": "object",
+        "required": ["content"],
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Новое содержание комментария",
+            "minLength": 10,
+            "maxLength": 5000,
+            "example": "Дополню свой отзыв: организация была на высшем уровне!"
+          }
+        }
+      },
+      "EventCommentUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Идентификатор комментария",
+            "example": 2
+          },
+          "content": {
+            "type": "string",
+            "description": "Содержание комментария",
+            "example": "Отличное мероприятие! Очень понравилась атмосфера и организация."
+          },
+          "author": {
+            "type": "string",
+            "description": "Имя автора комментария",
+            "example": "Анна Смирнова"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания комментария",
+            "example": "2026-09-05T18:30:15.123456"
+          }
+        },
+        "description": "Ответ с данными комментария для публичного просмотра (только APPROVED, без статуса)"
+      },
+      "EventCommentAuthorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Идентификатор комментария",
+            "example": 5
+          },
+          "content": {
+            "type": "string",
+            "description": "Содержание комментария",
+            "example": "Отличное мероприятие! Очень понравилось!"
+          },
+          "author": {
+            "type": "string",
+            "description": "Имя автора комментария",
+            "example": "Анна Смирнова"
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус комментария",
+            "enum": ["WAITING", "APPROVED", "REJECTED"],
+            "example": "WAITING"
+          },
+          "event": {
+            "type": "string",
+            "description": "Название события комментария",
+            "example": "Анна Смирнова"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания комментария",
+            "example": "2026-09-05T23:46:49.410901"
+          }
+        },
+        "description": "Ответ с данными комментария для автора (со статусом)"
+      },
+      "EventCommentAdminDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Идентификатор комментария",
+            "example": 10
+          },
+          "content": {
+            "type": "string",
+            "description": "Содержание комментария",
+            "example": "Отличное мероприятие! Всем рекомендую!"
+          },
+          "author": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64",
+                "description": "ID автора",
+                "example": 5
+              },
+              "name": {
+                "type": "string",
+                "description": "Имя автора",
+                "example": "Екатерина Морозова"
+              },
+              "email": {
+                "type": "string",
+                "description": "Email автора",
+                "example": "morozova@example.com"
+              }
+            },
+            "description": "Информация об авторе комментария"
+          },
+          "event": {
+            "type": "string",
+            "description": "Название события",
+            "example": "Летний фестиваль музыки"
+          },
+          "status": {
+            "type": "string",
+            "description": "Статус комментария",
+            "enum": ["WAITING", "APPROVED", "REJECTED"],
+            "example": "WAITING"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания комментария",
+            "example": "2026-09-05T20:10:35.123456"
+          }
+        },
+        "description": "Ответ с данными комментария для администратора"
+      }
+    }
+  }
+}

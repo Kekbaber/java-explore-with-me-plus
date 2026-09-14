@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.validation.BindException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.main.exception.model.AccessDeniedException;
 import ru.practicum.main.exception.model.ConflictException;
 import ru.practicum.main.exception.model.NotFoundException;
 
@@ -141,5 +142,13 @@ public class ErrorHandler {
                 HttpStatus.CONFLICT,
                 request
         );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleAccess(final AccessDeniedException e, HttpServletRequest request) {
+        log.error("Отсутствует доступ: {}", e.getMessage());
+        return buildApiError("Access is unavailable.",
+                e.getMessage(), HttpStatus.FORBIDDEN, request);
     }
 }
